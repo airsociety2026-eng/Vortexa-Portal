@@ -30,7 +30,19 @@ export async function getSessionUser(): Promise<JWTPayload | null> {
   const cookieStore = cookies();
   const token = cookieStore.get("vortexa_session")?.value;
   if (!token) return null;
-  return verifyToken(token);
+  const decoded = verifyToken(token);
+  if (!decoded) return null;
+
+  const user = await db.user.findUnique({
+    where: { id: decoded.userId },
+    select: { is_active: true }
+  });
+
+  if (!user || !user.is_active) {
+    return null;
+  }
+
+  return decoded;
 }
 
 export async function getFullSessionUser() {

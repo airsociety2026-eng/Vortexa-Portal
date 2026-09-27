@@ -29,7 +29,13 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.eventSettings.deleteMany();
 
-  const passwordHash = await bcrypt.hash("password123", 10);
+  // WARNING: These are DEVELOPMENT credentials only.
+  // DO NOT use seed.ts to provision production environments.
+  const seedPassword = process.env.SEED_PASSWORD || "password123";
+  if (process.env.NODE_ENV === "production" && seedPassword === "password123") {
+    console.warn("⚠️ WARNING: Seeding production database with default weak password!");
+  }
+  const passwordHash = await bcrypt.hash(seedPassword, 10);
 
   // 2. Event Settings
   const now = new Date();

@@ -10,8 +10,10 @@ generator client {
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
+  name          String?
   password_hash String
-  role          String   @default("PARTICIPANT") // PARTICIPANT, TEAM_LEADER, VOLUNTEER, JUDGE, ADMIN, SUPER_ADMIN
+  role          String   @default("PARTICIPANT") // PARTICIPANT, TEAM_LEADER, VOLUNTEER, JUDGE, ADMIN
+  is_active     Boolean  @default(true)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 

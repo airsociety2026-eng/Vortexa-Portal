@@ -6,6 +6,7 @@ import { Gavel, UserPlus, Users, ArrowRight } from "lucide-react";
 export default function AdminJudgesPage() {
   const [loading, setLoading] = useState(true);
   const [teams, setTeams] = useState<any[]>([]);
+  const [judges, setJudges] = useState<any[]>([]);
   const [selectedJudgeId, setSelectedJudgeId] = useState("");
   const [selectedTeamId, setSelectedTeamId] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -16,6 +17,12 @@ export default function AdminJudgesPage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.success) setTeams(data.data || []);
+      });
+      
+    fetch("/api/judges")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) setJudges(data.data || []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -23,7 +30,7 @@ export default function AdminJudgesPage() {
 
   const handleAssign = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTeamId) return;
+    if (!selectedTeamId || !selectedJudgeId) return;
 
     setSubmitting(true);
     setMsg("");
@@ -33,7 +40,7 @@ export default function AdminJudgesPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          judgeId: selectedJudgeId || "judge-default-id",
+          judgeId: selectedJudgeId,
           teamId: selectedTeamId,
         }),
       });
@@ -76,13 +83,17 @@ export default function AdminJudgesPage() {
 
           <form onSubmit={handleAssign} className="space-y-3 text-xs">
             <div>
-              <label className="block font-semibold text-slate-300 mb-1">Select Judge</label>
+              <label className="block font-semibold text-slate-300 mb-1">Select Judge *</label>
               <select
+                required
                 value={selectedJudgeId}
                 onChange={(e) => setSelectedJudgeId(e.target.value)}
                 className="w-full p-2.5 rounded-xl glass-input"
               >
-                <option value="">Dr. Alex Rivera (Distributed Systems & AI)</option>
+                <option value="">Select Judge...</option>
+                {judges.map(j => (
+                  <option key={j.id} value={j.id}>{j.name} ({j.expertise})</option>
+                ))}
               </select>
             </div>
 
@@ -115,11 +126,31 @@ export default function AdminJudgesPage() {
 
         <div className="glass-card p-6 rounded-2xl border border-white/10 space-y-4">
           <h3 className="font-bold text-white text-sm">Active Judge Panel</h3>
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-white/5 space-y-1 text-xs">
-            <span className="font-bold text-white text-sm">Dr. Alex Rivera</span>
-            <p className="text-slate-400">Expertise: Distributed Systems, AI Agents & Cloud Security</p>
-            <span className="font-mono text-cyan-400 text-[10px] block">judge.alex@vortexa.io</span>
-          </div>
+          
+          {loading ? (
+            <div className="p-4 rounded-xl bg-slate-900/60 border border-white/5 text-slate-400 text-xs">
+              Loading judges...
+            </div>
+          ) : judges.length === 0 ? (
+            <div className="p-4 rounded-xl bg-slate-900/60 border border-white/5 text-slate-400 text-xs">
+              No active judges found.
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+              {judges.map(judge => (
+                <div key={judge.id} className="p-4 rounded-xl bg-slate-900/60 border border-white/5 space-y-1 text-xs">
+                  <div className="flex justify-between items-start">
+                    <span className="font-bold text-white text-sm">{judge.name}</span>
+                    {!judge.user?.is_active && (
+                      <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px]">Deactivated</span>
+                    )}
+                  </div>
+                  <p className="text-slate-400">Expertise: {judge.expertise}</p>
+                  <span className="font-mono text-cyan-400 text-[10px] block">{judge.user?.email}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

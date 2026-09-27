@@ -26,6 +26,10 @@ export async function POST(req: NextRequest) {
       return apiError("Invalid credentials", 401);
     }
 
+    if (!user.is_active) {
+      return apiError("Account deactivated", 403);
+    }
+
     const isValid = await bcrypt.compare(validated.password, user.password_hash);
     if (!isValid) {
       return apiError("Invalid credentials", 401);
