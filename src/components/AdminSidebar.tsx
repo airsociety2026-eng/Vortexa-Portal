@@ -32,7 +32,6 @@ export function AdminSidebar({ userRole }: { userRole: string }) {
     {
       title: "Event Day",
       items: [
-        { href: "/admin/scanner", label: "QR Scanner", icon: QrCode },
         { href: "/admin/checkins", label: "Check-in Desk", icon: CheckCircle },
         { href: "/admin/rooms", label: "Room Allocation", icon: Building },
       ],
@@ -50,7 +49,6 @@ export function AdminSidebar({ userRole }: { userRole: string }) {
         { href: "/admin/submissions", label: "Submissions", icon: FolderGit2 },
         { href: "/admin/monitoring", label: "GitHub Monitor", icon: Activity },
         { href: "/admin/judges", label: "Judges", icon: Gavel },
-        { href: "/admin/scoring", label: "Scoring Portal", icon: Sliders },
         { href: "/admin/criteria", label: "Criteria", icon: Sliders },
       ],
     },
@@ -64,6 +62,7 @@ export function AdminSidebar({ userRole }: { userRole: string }) {
     {
       title: "System",
       items: [
+        { href: "/admin/staff", label: "Staff Management", icon: ShieldAlert },
         { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
         { href: "/admin/audit-logs", label: "Audit Logs", icon: ShieldAlert },
         { href: "/admin/settings", label: "Settings", icon: Settings },
