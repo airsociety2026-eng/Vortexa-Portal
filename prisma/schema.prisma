@@ -1,0 +1,342 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String
+  role          String   @default("PARTICIPANT") // PARTICIPANT, TEAM_LEADER, VOLUNTEER, JUDGE, ADMIN, SUPER_ADMIN
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  participant        Participant?
+  judge              Judge?
+  audit_logs         AuditLog[]     @relation("ActorAuditLogs")
+  notifications      Notification[]
+  submitted_payments Payment[]      @relation("PayerPayments")
+  verified_payments  Payment[]      @relation("VerifierPayments")
+
+  @@map("users")
+}
+
+model Participant {
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  name        String
+  phone       String
+  college     String
+  course      String
+  department  String
+  year        String
+  roll_number String?
+  created_at  DateTime @default(now())
+
+  team_memberships TeamMember[]
+  certificates     Certificate[]
+
+  @@map("participants")
+}
+
+model Team {
+  id         String   @id @default(uuid())
+  team_code  String   @unique
+  team_name  String
+  leader_id  String
+  status     String   @default("PENDING") // PENDING, CONFIRMED, REJECTED
+  created_at DateTime @default(now())
+
+  members           TeamMember[]
+  payment           Payment?
+  ticket            Ticket?
+  checkin           CheckIn?
+  room_allocation   RoomAllocation?
+  submission        Submission?
+  result            Result?
+  certificates      Certificate[]
+  judge_assignments JudgeAssignment[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id             String      @id @default(uuid())
+  team_id        String
+  team           Team        @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  participant_id String      @unique
+  participant    Participant @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  role           String      @default("MEMBER") // LEADER, MEMBER
+  joined_at      DateTime    @default(now())
+
+  @@unique([team_id, participant_id])
+  @@map("team_members")
+}
+
+model Payment {
+  id               String    @id @default(uuid())
+  team_id          String    @unique
+  team             Team      @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  submitted_by_id  String
+  submitted_by     User      @relation("PayerPayments", fields: [submitted_by_id], references: [id])
+  payer_name       String
+  upi_id           String
+  utr_number       String    @unique
+  amount           Float
+  screenshot_url   String
+  status           String    @default("PENDING") // NOT_SUBMITTED, PENDING, VERIFIED, REJECTED
+  rejection_reason String?
+  submitted_at     DateTime  @default(now())
+  verified_at      DateTime?
+  verified_by_id   String?
+  verified_by      User?     @relation("VerifierPayments", fields: [verified_by_id], references: [id])
+
+  @@map("payments")
+}
+
+model Ticket {
+  id            String    @id @default(uuid())
+  ticket_code   String    @unique
+  team_id       String    @unique
+  team          Team      @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  status        String    @default("ACTIVE") // ACTIVE, USED, CANCELLED
+  issued_at     DateTime  @default(now())
+  qr_code_url   String?
+  email_status  String    @default("PENDING") // PENDING, SENT, FAILED
+  email_sent_at DateTime?
+  email_error   String?
+
+  checkin CheckIn?
+
+  @@map("tickets")
+}
+
+model CheckIn {
+  id            String   @id @default(uuid())
+  team_id       String   @unique
+  team          Team     @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  ticket_id     String   @unique
+  ticket        Ticket   @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  checked_in_by String
+  checked_in_at DateTime @default(now())
+  location      String   @default("Main Desk")
+  notes         String?
+
+  @@map("checkins")
+}
+
+model Room {
+  id          String  @id @default(uuid())
+  room_name   String  @unique
+  building    String
+  floor       String
+  capacity    Int     @default(4)
+  description String?
+  status      String  @default("AVAILABLE")
+
+  allocations RoomAllocation[]
+
+  @@map("rooms")
+}
+
+model RoomAllocation {
+  id           String   @id @default(uuid())
+  team_id      String   @unique
+  team         Team     @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  room_id      String
+  room         Room     @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  allocated_by String
+  allocated_at DateTime @default(now())
+
+  @@map("room_allocations")
+}
+
+model Announcement {
+  id              String   @id @default(uuid())
+  title           String
+  message         String
+  priority        String   @default("NORMAL") // NORMAL, IMPORTANT, URGENT
+  target_audience String   @default("ALL")
+  is_published    Boolean  @default(true)
+  published_at    DateTime @default(now())
+  created_by      String
+
+  @@map("announcements")
+}
+
+model ProblemStatement {
+  id           String   @id @default(uuid())
+  title        String
+  description  String
+  category     String
+  difficulty   String   @default("Medium")
+  rules        String?
+  resources    String?
+  attachments  String?
+  is_published Boolean  @default(true)
+  published_at DateTime @default(now())
+  created_by   String
+
+  @@map("problem_statements")
+}
+
+model Submission {
+  id                    String    @id @default(uuid())
+  team_id               String    @unique
+  team                  Team      @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  project_title         String
+  description           String
+  tech_stack            String
+  github_url            String
+  demo_url              String
+  youtube_url           String?
+  google_drive_url      String?
+  video_url             String?
+  github_owner          String?
+  github_repo           String?
+  github_last_synced_at DateTime?
+  additional_links      String?
+  project_files         String?
+  status                String    @default("DRAFT") // DRAFT, SUBMITTED, LOCKED
+  submitted_at          DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+
+  scores Score[]
+
+  @@map("submissions")
+}
+
+model Judge {
+  id        String  @id @default(uuid())
+  user_id   String  @unique
+  user      User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  name      String
+  expertise String
+  bio       String?
+
+  assignments JudgeAssignment[]
+  scores      Score[]
+
+  @@map("judges")
+}
+
+model JudgeAssignment {
+  id          String   @id @default(uuid())
+  judge_id    String
+  judge       Judge    @relation(fields: [judge_id], references: [id], onDelete: Cascade)
+  team_id     String
+  team        Team     @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  assigned_at DateTime @default(now())
+
+  @@unique([judge_id, team_id])
+  @@map("judge_assignments")
+}
+
+model JudgingCriteria {
+  id          String @id @default(uuid())
+  name        String
+  description String
+  max_score   Int    @default(20)
+  weight      Float  @default(1.0)
+
+  scores Score[]
+
+  @@map("judging_criteria")
+}
+
+model Score {
+  id            String          @id @default(uuid())
+  judge_id      String
+  judge         Judge           @relation(fields: [judge_id], references: [id], onDelete: Cascade)
+  submission_id String
+  submission    Submission      @relation(fields: [submission_id], references: [id], onDelete: Cascade)
+  criteria_id   String
+  criteria      JudgingCriteria @relation(fields: [criteria_id], references: [id], onDelete: Cascade)
+  score_value   Float
+  comments      String?
+  submitted_at  DateTime        @default(now())
+
+  @@unique([judge_id, submission_id, criteria_id])
+  @@map("scores")
+}
+
+model Result {
+  id           String    @id @default(uuid())
+  team_id      String    @unique
+  team         Team      @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  total_score  Float
+  rank         Int
+  award        String?
+  status       String    @default("DRAFT") // DRAFT, PUBLISHED
+  published_at DateTime?
+
+  @@map("results")
+}
+
+model Certificate {
+  id               String      @id @default(uuid())
+  certificate_code String      @unique
+  participant_id   String
+  participant      Participant @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  team_id          String
+  team             Team        @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  certificate_type String      @default("PARTICIPATION") // PARTICIPATION, FINALIST, WINNER, RUNNER_UP, SPECIAL_AWARD
+  event_name       String      @default("VORTEXA 2026")
+  issue_date       DateTime    @default(now())
+  pdf_url          String?
+
+  @@map("certificates")
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  title      String
+  message    String
+  type       String   @default("INFO")
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actor_id    String?
+  actor       User?    @relation("ActorAuditLogs", fields: [actor_id], references: [id])
+  actor_email String
+  action      String
+  entity      String
+  entity_id   String?
+  details     String?
+  timestamp   DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model EventSettings {
+  id                  String   @id @default(uuid())
+  event_name          String   @default("VORTEXA 2026")
+  event_year          String   @default("2026")
+  registration_open   Boolean  @default(true)
+  registration_close  Boolean  @default(false)
+  payment_deadline    DateTime @default(now())
+  hackathon_start     DateTime @default(now())
+  hackathon_end       DateTime @default(now())
+  submission_deadline DateTime @default(now())
+  max_team_size       Int      @default(4)
+  min_team_size       Int      @default(1)
+  payment_amount      Float    @default(500)
+  upi_id              String   @default("vortexa@upi")
+  upi_qr_url          String   @default("/assets/upi-qr.png")
+  venue               String   @default("Campus Auditorium & Innovation Center")
+  official_email      String   @default("support@vortexa.io")
+
+  @@map("event_settings")
+}

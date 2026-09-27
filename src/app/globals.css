@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   VORTEXA 2026 — SWISS EDITORIAL DESIGN SYSTEM
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --background:           #F7F7F5;
+  --background-secondary: #F1F1EF;
+  --surface:              #FFFFFF;
+  --foreground:           #111111;
+  --foreground-secondary: #262626;
+  --body:                 #4B4B4B;
+  --muted:                #737373;
+  --border:               #DCDCDC;
+  --border-light:         #EAEAEA;
+  --border-strong:        #BDBDBD;
+  --primary:              #1D4ED8;
+  --primary-hover:        #1E40AF;
+  --primary-soft:         #EFF6FF;
+  --success:              #16803C;
+  --success-bg:           #ECFDF3;
+  --warning:              #B45309;
+  --warning-bg:           #FFFBEB;
+  --error:                #B42318;
+  --error-bg:             #FEF3F2;
+  --info:                 #1D4ED8;
+  --info-bg:              #EFF6FF;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--background-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* ---- Cards ---- */
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+.glass-card-hover { transition: border-color 0.15s ease; }
+.glass-card-hover:hover { border-color: var(--primary); }
+
+/* ---- Buttons ---- */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; background: var(--primary); color: #FFFFFF;
+  font-size: 13px; font-weight: 600; border-radius: 6px; border: none;
+  cursor: pointer; transition: background 0.15s ease; text-decoration: none;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; background: transparent; color: var(--foreground);
+  font-size: 13px; font-weight: 600; border-radius: 6px;
+  border: 1px solid var(--border); cursor: pointer;
+  transition: all 0.15s ease; text-decoration: none;
+}
+.btn-secondary:hover { background: var(--background-secondary); border-color: var(--border-strong); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; background: transparent; color: var(--muted);
+  font-size: 13px; font-weight: 500; border-radius: 6px; border: none;
+  cursor: pointer; transition: all 0.15s ease; text-decoration: none;
+}
+.btn-ghost:hover { color: var(--foreground); background: var(--background-secondary); }
+
+.gradient-btn {
+  background: var(--primary); color: #FFFFFF;
+  font-weight: 600; border-radius: 6px; transition: background 0.15s ease;
+}
+.gradient-btn:hover { background: var(--primary-hover); }
+
+/* ---- Inputs ---- */
+.glass-input {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--foreground); font-size: 13px; border-radius: 6px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.glass-input:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.1);
+}
+.glass-input::placeholder { color: var(--muted); }
+
+/* ---- Status Badges ---- */
+.badge-confirmed {
+  background: var(--success-bg); color: var(--success);
+  border: 1px solid #BBF7D0; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+}
+.badge-pending {
+  background: var(--warning-bg); color: var(--warning);
+  border: 1px solid #FDE68A; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+}
+.badge-rejected {
+  background: var(--error-bg); color: var(--error);
+  border: 1px solid #FECACA; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+}
+.badge-info {
+  background: var(--info-bg); color: var(--info);
+  border: 1px solid #BFDBFE; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+}
+.badge-neutral {
+  background: var(--background-secondary); color: var(--muted);
+  border: 1px solid var(--border); font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+}
+
+/* ---- Tables ---- */
+.vx-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.vx-table th {
+  text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  background: var(--background); border-bottom: 1px solid var(--border);
+}
+.vx-table td {
+  padding: 12px 14px; color: var(--foreground-secondary);
+  border-bottom: 1px solid var(--border-light); vertical-align: middle;
+}
+.vx-table tr:hover td { background: var(--background); }
+
+/* ---- Focus ---- */
+*:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+
+/* ---- Spinner ---- */
+.vx-spinner {
+  width: 20px; height: 20px; border: 2px solid var(--border);
+  border-top-color: var(--primary); border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Legacy shims ---- */
+.animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.cyan-gradient-text { color: var(--primary); }
+.purple-gradient-text { color: var(--primary); }
+.shadow-glow { box-shadow: none !important; }
+.shadow-glow-purple { box-shadow: none !important; }
