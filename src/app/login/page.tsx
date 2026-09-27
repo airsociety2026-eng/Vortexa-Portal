@@ -30,8 +30,12 @@ export default function LoginPage() {
         return;
       }
       const role = data.data.user.role;
-      if (role === "ADMIN" || role === "SUPER_ADMIN" || role === "VOLUNTEER" || role === "JUDGE") {
+      if (role === "ADMIN") {
         router.push("/admin");
+      } else if (role === "JUDGE") {
+        router.push("/judge");
+      } else if (role === "VOLUNTEER") {
+        router.push("/staff");
       } else {
         router.push("/dashboard");
       }
