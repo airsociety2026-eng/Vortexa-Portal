@@ -63,7 +63,8 @@ export default function TicketPage() {
           </div>
         ) : (
           /* Swiss Editorial Ticket */
-          <div className="bg-white border border-[#EAEAEA] rounded-md overflow-hidden">
+          <>
+            <div className="bg-white border border-[#EAEAEA] rounded-md overflow-hidden">
             {/* Ticket Header */}
             <div className="bg-[#111111] px-7 py-6">
               <div className="flex items-start justify-between">
@@ -149,6 +150,7 @@ export default function TicketPage() {
               </Link>
             </div>
           )}
+          </>
         )}
       </main>
 
