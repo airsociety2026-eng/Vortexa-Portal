@@ -186,14 +186,31 @@ export default function AdminPaymentsPage() {
           <div className="bg-white max-w-2xl w-full p-5 rounded-lg border border-[#EAEAEA] space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between pb-3 border-b border-[#EAEAEA]">
               <h3 className="text-sm font-semibold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif" }}>Payment Screenshot Proof</h3>
-              <button onClick={() => setSelectedScreenshot(null)} className="text-[#737373] hover:text-[#111111] text-lg leading-none">?</button>
+              <button onClick={() => setSelectedScreenshot(null)} className="text-[#737373] hover:text-[#111111] text-lg leading-none">✕</button>
             </div>
-            <div className="bg-[#F7F7F5] rounded-md flex items-center justify-center max-h-[65vh] overflow-hidden">
-              <img src={selectedScreenshot} alt="Payment Proof" className="max-h-[60vh] object-contain rounded" />
+            <div className="bg-[#F7F7F5] rounded-md flex items-center justify-center min-h-[200px] max-h-[65vh] overflow-hidden">
+              {selectedScreenshot.startsWith("/uploads/") || selectedScreenshot === "" ? (
+                <div className="text-center py-10 text-[#737373]">
+                  <p className="text-sm font-semibold">No screenshot available</p>
+                  <p className="text-xs mt-1">This payment was submitted before image upload was available,<br/>or the file was stored on the old server and is no longer accessible.</p>
+                </div>
+              ) : (
+                <img
+                  src={selectedScreenshot}
+                  alt="Payment Proof"
+                  className="max-h-[60vh] object-contain rounded"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                    (e.target as HTMLImageElement).parentElement!.innerHTML =
+                      '<div class="text-center py-10 text-gray-500"><p class="text-sm font-semibold">Screenshot unavailable</p><p class="text-xs mt-1">The image could not be loaded.</p></div>';
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>
       )}
+
 
       {/* Rejection Modal */}
       {rejectingPayment && (

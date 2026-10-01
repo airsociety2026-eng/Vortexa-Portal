@@ -29,7 +29,10 @@ export default function PaymentPage() {
         if (tData.data?.team?.payment) {
           const p = tData.data.team.payment;
           setPayerName(p.payer_name); setUpiId(p.upi_id);
-          setUtrNumber(p.utr_number); setAmount(p.amount); setScreenshotUrl(p.screenshot_url);
+          setUtrNumber(p.utr_number); setAmount(p.amount);
+          // Clear legacy /uploads/ paths that no longer exist on Vercel
+          const url = p.screenshot_url || "";
+          setScreenshotUrl(url.startsWith("/uploads/") ? "" : url);
         }
       }
       if (sData.success && sData.data) {
