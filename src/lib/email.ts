@@ -75,7 +75,7 @@ export async function sendTicketEmail({
           <p style="color: #d1fae5; font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
             All important announcements, event updates, and direct support from the organizers will be shared here. <strong>Mandatory for team leaders.</strong>
           </p>
-          <a href="https://chat.whatsapp.com/INSERT_YOUR_LINK_HERE" style="display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 24px; border-radius: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
+          <a href="https://chat.whatsapp.com/KoJnW2xlJq2GlOFP6O4lvt" style="display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 24px; border-radius: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
             Join WhatsApp Group
           </a>
         </div>
