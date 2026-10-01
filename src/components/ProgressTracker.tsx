@@ -27,8 +27,7 @@ export function ProgressTracker({ state }: { state: JourneyState }) {
     { id: "ticket",      label: "Ticket",         completed: state.ticketGenerated,       current: state.paymentStatus === "VERIFIED" && !state.ticketGenerated, detail: state.ticketGenerated ? "QR Active" : "Locked" },
     { id: "checkin",     label: "Check-in",       completed: state.checkedIn,             current: state.ticketGenerated && !state.checkedIn, detail: state.checkedIn ? "Checked In" : "Event Day" },
     { id: "room",        label: "Room",           completed: state.roomAllocated,         current: state.checkedIn && !state.roomAllocated, detail: state.roomAllocated ? state.roomName || "Assigned" : "Pending" },
-    { id: "submission",  label: "Submission",     completed: state.submitted,             current: state.roomAllocated && !state.submitted, detail: state.submitted ? "Submitted" : "Open" },
-    { id: "results",     label: "Results",        completed: state.resultsPublished,      current: state.submitted && !state.resultsPublished, detail: state.resultsPublished ? "Published" : "Judging" },
+    { id: "results",     label: "Results",        completed: state.resultsPublished,      current: state.roomAllocated && !state.resultsPublished, detail: state.resultsPublished ? "Published" : "Judging" },
     { id: "certificate", label: "Certificate",    completed: state.certificateAvailable,  current: state.resultsPublished && !state.certificateAvailable, detail: state.certificateAvailable ? "Available" : "Pending" },
   ];
 
@@ -41,7 +40,7 @@ export function ProgressTracker({ state }: { state: JourneyState }) {
         </h3>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-9 gap-2">
         {steps.map((step) => {
           const hrefMap: Record<string, string> = {
             reg: "/dashboard/profile",
@@ -51,7 +50,6 @@ export function ProgressTracker({ state }: { state: JourneyState }) {
             ticket: "/dashboard/ticket",
             checkin: "/dashboard/room",
             room: "/dashboard/room",
-            submission: "/dashboard/submission",
             results: "/dashboard/results",
             certificate: "/dashboard/certificate",
           };

@@ -18,7 +18,7 @@ export function Footer() {
               </span>
             </div>
             <p className="text-xs text-[#737373] leading-relaxed">
-              Professional hackathon registration, team management, payment verification, QR check-in, submission, judging, and certificate platform.
+              The premier coding hackathon of the year, bringing together the best minds to solve real-world problems.
             </p>
           </div>
 
@@ -32,23 +32,6 @@ export function Footer() {
                 { href: "/dashboard/payment", label: "Payment" },
                 { href: "/dashboard/ticket", label: "Event Ticket & QR" },
                 { href: "/dashboard/problems", label: "Problem Tracks" },
-              ].map(l => (
-                <li key={l.href}>
-                  <Link href={l.href} className="text-[#4B4B4B] hover:text-[#1D4ED8] transition-colors">{l.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Admin */}
-          <div>
-            <h4 className="text-[10px] font-semibold text-[#737373] uppercase tracking-widest mb-4">Administration</h4>
-            <ul className="space-y-2.5 text-xs">
-              {[
-                { href: "/verify/check", label: "Verify Certificate" },
-                { href: "/login", label: "Sign In" },
-                { href: "/admin/scanner", label: "QR Scanner" },
-                { href: "/admin", label: "Admin Console" },
               ].map(l => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-[#4B4B4B] hover:text-[#1D4ED8] transition-colors">{l.label}</Link>

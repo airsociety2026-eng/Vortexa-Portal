@@ -63,9 +63,8 @@ export default function ParticipantDashboard() {
     { href: "/dashboard/ticket",      label: "3. Ticket" },
     { href: "/dashboard/room",        label: "4. Room" },
     { href: "/dashboard/problems",    label: "5. Tracks" },
-    { href: "/dashboard/submission",  label: "6. Submission" },
-    { href: "/dashboard/results",     label: "7. Results" },
-    { href: "/dashboard/certificate", label: "8. Certificate" },
+    { href: "/dashboard/results",     label: "6. Results" },
+    { href: "/dashboard/certificate", label: "7. Certificate" },
   ];
 
   return (
@@ -157,80 +156,38 @@ export default function ParticipantDashboard() {
           })}
         </div>
 
-        {/* Announcements & Submission */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white border border-[#EAEAEA] rounded-md p-6">
-            <div className="flex items-center gap-2 mb-5">
-              <Bell className="w-4 h-4 text-[#1D4ED8]" />
-              <h3 className="text-sm font-semibold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif" }}>
-                Announcements
-              </h3>
-            </div>
-
-            {announcements.length === 0 ? (
-              <div className="py-10 text-center">
-                <p className="text-xs text-[#BDBDBD]">No announcements published yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {announcements.map((ann) => (
-                  <div key={ann.id} className="p-4 bg-[#F7F7F5] border border-[#EAEAEA] rounded-md">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-sm font-semibold text-[#111111]">{ann.title}</span>
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-sm ${
-                        ann.priority === "URGENT" ? "bg-[#FEF3F2] text-[#B42318]" :
-                        ann.priority === "IMPORTANT" ? "bg-[#FFFBEB] text-[#B45309]" :
-                        "bg-[#F1F1EF] text-[#737373]"
-                      }`}>
-                        {ann.priority}
-                      </span>
-                    </div>
-                    <p className="text-xs text-[#4B4B4B]">{ann.message}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+        {/* Announcements */}
+        <div className="bg-white border border-[#EAEAEA] rounded-md p-6 mb-8">
+          <div className="flex items-center gap-2 mb-5">
+            <Bell className="w-4 h-4 text-[#1D4ED8]" />
+            <h3 className="text-sm font-semibold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif" }}>
+              Announcements
+            </h3>
           </div>
 
-          <div className="bg-white border border-[#EAEAEA] rounded-md p-6 flex flex-col">
-            <div className="flex items-center gap-2 mb-5">
-              <FolderGit2 className="w-4 h-4 text-[#1D4ED8]" />
-              <h3 className="text-sm font-semibold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif" }}>
-                Project Submission
-              </h3>
+          {announcements.length === 0 ? (
+            <div className="py-10 text-center">
+              <p className="text-xs text-[#BDBDBD]">No announcements published yet.</p>
             </div>
-
-            <div className="flex-1">
-              {team?.submission ? (
-                <div className="p-4 bg-[#F7F7F5] border border-[#EAEAEA] rounded-md">
-                  <div className="flex items-start justify-between mb-1.5">
-                    <span className="text-sm font-semibold text-[#111111]">{team.submission.project_title}</span>
+          ) : (
+            <div className="space-y-3">
+              {announcements.map((ann) => (
+                <div key={ann.id} className="p-4 bg-[#F7F7F5] border border-[#EAEAEA] rounded-md">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm font-semibold text-[#111111]">{ann.title}</span>
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-sm ${
-                      team.submission.status === "SUBMITTED" ? "bg-[#ECFDF3] text-[#16803C]" :
-                      team.submission.status === "LOCKED"    ? "bg-[#FEF3F2] text-[#B42318]" :
+                      ann.priority === "URGENT" ? "bg-[#FEF3F2] text-[#B42318]" :
+                      ann.priority === "IMPORTANT" ? "bg-[#FFFBEB] text-[#B45309]" :
                       "bg-[#F1F1EF] text-[#737373]"
                     }`}>
-                      {team.submission.status}
+                      {ann.priority}
                     </span>
                   </div>
-                  <p className="text-xs text-[#4B4B4B] line-clamp-2">{team.submission.description}</p>
+                  <p className="text-xs text-[#4B4B4B]">{ann.message}</p>
                 </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 border border-dashed border-[#EAEAEA] rounded-md">
-                  <Clock className="w-6 h-6 text-[#DCDCDC] mb-2" />
-                  <p className="text-xs text-[#BDBDBD]">No submission yet</p>
-                </div>
-              )}
+              ))}
             </div>
-
-            <Link
-              href="/dashboard/submission"
-              className="mt-5 w-full py-2.5 bg-[#1D4ED8] text-white text-xs font-semibold rounded-md hover:bg-[#1E40AF] transition-colors flex items-center justify-center gap-2"
-            >
-              {team?.submission ? "Edit Submission" : "Submit Project"}
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
+          )}
         </div>
       </main>
 
