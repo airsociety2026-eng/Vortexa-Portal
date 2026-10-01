@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import QRCode from "qrcode";
 import { db } from "./db";
 
 // Initialize Nodemailer transporter
@@ -62,7 +63,7 @@ export async function sendTicketEmail({
 
         <div style="text-align: center; padding: 20px; background-color: #111726; border-radius: 16px; margin: 25px 0; border: 1px solid #06b6d4;">
           <p style="color: #22d3ee; font-weight: bold; margin-top: 0; font-size: 14px;">YOUR EVENT ENTRY QR PASS</p>
-          <img src="${qrCodeUrl}" alt="Event Ticket QR Code" style="width: 180px; height: 180px; border-radius: 12px; background: white; padding: 10px;" />
+          <img src="cid:ticket-qr" alt="Event Ticket QR Code" style="width: 180px; height: 180px; border-radius: 12px; background: white; padding: 10px;" />
           <p style="color: #9ca3af; font-size: 12px; margin-bottom: 0; font-family: monospace; margin-top: 10px;">${ticketCode}</p>
         </div>
 
@@ -91,11 +92,25 @@ export async function sendTicketEmail({
   }
 
   try {
+    let qrAttachment = null;
+    try {
+      qrAttachment = await QRCode.toDataURL(ticketCode, { width: 300, margin: 2, color: { dark: '#000000', light: '#ffffff' } });
+    } catch (e) {
+      console.error("[Email Error] Failed to generate QR code attachment", e);
+    }
+
     const info = await transporter.sendMail({
       from: `"VORTEXA Platform" <${senderEmail}>`,
       to: recipientEmail,
       subject: `🎉 VORTEXA 2026 Ticket Confirmed — Team ${teamName} (${teamCode})`,
       html: htmlBody,
+      attachments: qrAttachment ? [
+        {
+          filename: 'ticket-qr.png',
+          path: qrAttachment,
+          cid: 'ticket-qr'
+        }
+      ] : [],
     });
 
     console.log(`[Email Sent via Nodemailer] ID: ${info.messageId} to ${recipientEmail}`);
