@@ -14,7 +14,7 @@ export default function PaymentPage() {
   const [upiId, setUpiId] = useState("");
   const [utrNumber, setUtrNumber] = useState("");
   const [amount, setAmount] = useState(500);
-  const [screenshotUrl, setScreenshotUrl] = useState("/uploads/sample_payment_screenshot.png");
+  const [screenshotUrl, setScreenshotUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -225,22 +225,17 @@ export default function PaymentPage() {
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={async (e) => {
+                            onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (!file) return;
-                              const formData = new FormData();
-                              formData.append("file", file);
-                              try {
-                                const res = await fetch("/api/upload", { method: "POST", body: formData });
-                                const data = await res.json();
-                                if (data.success) {
-                                  setScreenshotUrl(data.url);
-                                } else {
-                                  alert(data.error || "Upload failed");
-                                }
-                              } catch {
-                                alert("Network error during upload");
+                              if (file.size > 5 * 1024 * 1024) {
+                                alert("Image must be under 5MB");
+                                return;
                               }
+                              const reader = new FileReader();
+                              reader.onload = () => setScreenshotUrl(reader.result as string);
+                              reader.onerror = () => alert("Failed to read image file");
+                              reader.readAsDataURL(file);
                             }}
                           />
                         </label>
