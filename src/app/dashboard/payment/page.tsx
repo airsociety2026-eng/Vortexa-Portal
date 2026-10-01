@@ -243,12 +243,17 @@ export default function PaymentPage() {
                               };
                               reader.onload = (ev) => {
                                 const dataUrl = ev.target?.result as string;
-                                const img = new Image();
-                                img.onerror = () => {
-                                  // Canvas failed — fall back to raw base64 (still works, just larger)
-                                  setScreenshotUrl(dataUrl);
-                                  setSuccess("Image ready. Click Submit to save.");
+                                const handleFallback = () => {
+                                  if (dataUrl.length > 3.5 * 1024 * 1024) { // ~3.5MB base64 limit
+                                    setSuccess("");
+                                    alert("Image compression failed, and the raw image is too large (over 3MB). Please crop it or choose a smaller file.");
+                                  } else {
+                                    setScreenshotUrl(dataUrl);
+                                    setSuccess("Image ready. Click Submit to save.");
+                                  }
                                 };
+                                const img = new Image();
+                                img.onerror = handleFallback;
                                 img.onload = () => {
                                   try {
                                     const MAX = 1200;
@@ -265,9 +270,7 @@ export default function PaymentPage() {
                                     setScreenshotUrl(compressed);
                                     setSuccess(`Image ready (${kb} KB). Click Submit to save.`);
                                   } catch {
-                                    // Canvas blocked (e.g. security policy) — use raw
-                                    setScreenshotUrl(dataUrl);
-                                    setSuccess("Image ready. Click Submit to save.");
+                                    handleFallback();
                                   }
                                 };
                                 img.src = dataUrl;

@@ -186,11 +186,17 @@ export default function AdminSettingsPage() {
                         };
                         reader.onload = (ev) => {
                           const dataUrl = ev.target?.result as string;
-                          const img = new Image();
-                          img.onerror = () => {
-                            setUpiQrUrl(dataUrl);
-                            setMsg("Image ready! Click Save to apply.");
+                          const handleFallback = () => {
+                            if (dataUrl.length > 3.5 * 1024 * 1024) {
+                              setMsg("");
+                              alert("Image compression failed, and the raw image is too large. Please choose a smaller file.");
+                            } else {
+                              setUpiQrUrl(dataUrl);
+                              setMsg("Image ready! Click Save to apply.");
+                            }
                           };
+                          const img = new Image();
+                          img.onerror = handleFallback;
                           img.onload = () => {
                             try {
                               const MAX = 600; // QR codes don't need to be large
@@ -206,8 +212,7 @@ export default function AdminSettingsPage() {
                               setUpiQrUrl(compressed);
                               setMsg("Image ready! Click Save to apply.");
                             } catch {
-                              setUpiQrUrl(dataUrl);
-                              setMsg("Image ready! Click Save to apply.");
+                              handleFallback();
                             }
                           };
                           img.src = dataUrl;
