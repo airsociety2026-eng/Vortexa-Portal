@@ -93,7 +93,7 @@ export async function sendTicketEmail({
   try {
     let qrAttachment: Buffer | null = null;
     try {
-      const qrResponse = await fetch(`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(ticketCode)}&choe=UTF-8`);
+      const qrResponse = await fetch(`https://quickchart.io/qr?text=${encodeURIComponent(ticketCode)}&size=300`);
       if (qrResponse.ok) {
         const arrayBuffer = await qrResponse.arrayBuffer();
         qrAttachment = Buffer.from(arrayBuffer);
