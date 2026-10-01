@@ -171,24 +171,21 @@ export default function AdminSettingsPage() {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={async (e) => {
+                      onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
-                        const formData = new FormData();
-                        formData.append("file", file);
-                        setMsg("Uploading image...");
-                        try {
-                          const res = await fetch("/api/upload", { method: "POST", body: formData });
-                          const data = await res.json();
-                          if (data.success) {
-                            setUpiQrUrl(data.url);
-                            setMsg("Image uploaded successfully! Click Save to apply.");
-                          } else {
-                            alert(data.error || "Upload failed");
-                          }
-                        } catch {
-                          alert("Network error during upload");
+                        if (file.size > 2 * 1024 * 1024) {
+                          alert("Image must be under 2MB");
+                          return;
                         }
+                        setMsg("Reading image...");
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          setUpiQrUrl(reader.result as string);
+                          setMsg("Image ready! Click Save to apply.");
+                        };
+                        reader.onerror = () => alert("Failed to read image file");
+                        reader.readAsDataURL(file);
                       }}
                     />
                   </label>
