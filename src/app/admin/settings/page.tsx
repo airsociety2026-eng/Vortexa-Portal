@@ -178,24 +178,41 @@ export default function AdminSettingsPage() {
                           alert("Image must be under 10MB");
                           return;
                         }
-                        setMsg("Compressing image...");
-                        const img = new Image();
-                        const objectUrl = URL.createObjectURL(file);
-                        img.onload = () => {
-                          URL.revokeObjectURL(objectUrl);
-                          const MAX = 600; // QR codes don't need to be large
-                          let w = img.width, h = img.height;
-                          if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
-                          if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
-                          const canvas = document.createElement("canvas");
-                          canvas.width = w; canvas.height = h;
-                          canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
-                          const compressed = canvas.toDataURL("image/jpeg", 0.85);
-                          setUpiQrUrl(compressed);
-                          setMsg("Image ready! Click Save to apply.");
+                        setMsg("Reading image...");
+                        const reader = new FileReader();
+                        reader.onerror = () => {
+                          setMsg("");
+                          alert("Could not read the selected file. Please try a different image.");
                         };
-                        img.onerror = () => alert("Failed to load image");
-                        img.src = objectUrl;
+                        reader.onload = (ev) => {
+                          const dataUrl = ev.target?.result as string;
+                          const img = new Image();
+                          img.onerror = () => {
+                            setUpiQrUrl(dataUrl);
+                            setMsg("Image ready! Click Save to apply.");
+                          };
+                          img.onload = () => {
+                            try {
+                              const MAX = 600; // QR codes don't need to be large
+                              let w = img.width, h = img.height;
+                              if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                              if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+                              const canvas = document.createElement("canvas");
+                              canvas.width = w; canvas.height = h;
+                              const ctx = canvas.getContext("2d");
+                              if (!ctx) throw new Error("no ctx");
+                              ctx.drawImage(img, 0, 0, w, h);
+                              const compressed = canvas.toDataURL("image/jpeg", 0.85);
+                              setUpiQrUrl(compressed);
+                              setMsg("Image ready! Click Save to apply.");
+                            } catch {
+                              setUpiQrUrl(dataUrl);
+                              setMsg("Image ready! Click Save to apply.");
+                            }
+                          };
+                          img.src = dataUrl;
+                        };
+                        reader.readAsDataURL(file);
                       }}
                     />
                   </label>
