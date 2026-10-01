@@ -137,8 +137,6 @@ export default function RegisterPage() {
                     />
                   </div>
 
-                  </div>
-
                   <div>
                     <label className="block text-xs font-semibold text-[#262626] mb-1.5">
                       Academic Year <span className="text-[#B42318]">*</span>
@@ -157,7 +155,7 @@ export default function RegisterPage() {
                     </select>
                   </div>
 
-                  </div>
+                </div>
               </div>
 
               <div className="border-t border-[#EAEAEA] mb-6" />
