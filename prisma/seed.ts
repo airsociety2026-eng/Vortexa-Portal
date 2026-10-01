@@ -79,9 +79,7 @@ async function main() {
       phone: "+91 9876543210",
       college: "VORTEXA University",
       course: "B.Tech Computer Science",
-      department: "CSE",
       year: "4th Year",
-      roll_number: "SUP-001",
     },
   });
 
@@ -100,9 +98,7 @@ async function main() {
       phone: "+91 9876543211",
       college: "VORTEXA University",
       course: "B.Tech Information Technology",
-      department: "IT",
       year: "4th Year",
-      roll_number: "ADM-002",
     },
   });
 
@@ -121,9 +117,7 @@ async function main() {
       phone: "+91 9876543212",
       college: "MIT Tech Faculty",
       course: "Ph.D. Artificial Intelligence",
-      department: "AI Research",
       year: "Faculty",
-      roll_number: "FAC-901",
     },
   });
   const judgeProfile = await prisma.judge.create({
@@ -150,9 +144,7 @@ async function main() {
       phone: "+91 9876543213",
       college: "VORTEXA Institute",
       course: "B.Tech Electronics",
-      department: "ECE",
       year: "2nd Year",
-      roll_number: "VOL-301",
     },
   });
 
@@ -171,9 +163,7 @@ async function main() {
       phone: "+91 9876543214",
       college: "PICT College of Engineering",
       course: "B.Tech Computer Engineering",
-      department: "Comp",
       year: "3rd Year",
-      roll_number: "311054",
     },
   });
 
@@ -192,9 +182,7 @@ async function main() {
       phone: "+91 9876543215",
       college: "COEP Tech University",
       course: "B.Tech Data Science",
-      department: "AIDS",
       year: "3rd Year",
-      roll_number: "411089",
     },
   });
 
