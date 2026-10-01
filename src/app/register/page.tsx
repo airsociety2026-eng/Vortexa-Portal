@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "", email: "", password: "", phone: "",
-    college: "", course: "", department: "",
+    college: "", course: "",
     year: "3rd Year", rollNumber: "",
   });
   const [loading, setLoading] = useState(false);
@@ -50,8 +50,6 @@ export default function RegisterPage() {
     { name: "phone",      label: "Phone Number",           type: "tel",      required: true,  placeholder: "+91 98765 43210" },
     { name: "college",    label: "College / Institute",    type: "text",     required: true,  placeholder: "PICT College of Engineering", colSpan: true },
     { name: "course",     label: "Degree / Course",        type: "text",     required: true,  placeholder: "B.Tech Computer Engineering" },
-    { name: "department", label: "Department",             type: "text",     required: true,  placeholder: "Computer Dept" },
-    { name: "rollNumber", label: "Roll / Student ID",      type: "text",     required: false, placeholder: "311054" },
   ];
 
   return (
@@ -139,19 +137,6 @@ export default function RegisterPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-[#262626] mb-1.5">
-                      Department <span className="text-[#B42318]">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="department"
-                      required
-                      value={formData.department}
-                      onChange={handleChange}
-                      placeholder="Computer Dept"
-                      className="w-full px-3 py-2.5 glass-input text-sm"
-                    />
                   </div>
 
                   <div>
@@ -172,18 +157,7 @@ export default function RegisterPage() {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-[#262626] mb-1.5">Roll / Student ID</label>
-                    <input
-                      type="text"
-                      name="rollNumber"
-                      value={formData.rollNumber}
-                      onChange={handleChange}
-                      placeholder="311054"
-                      className="w-full px-3 py-2.5 glass-input text-sm"
-                    />
                   </div>
-                </div>
               </div>
 
               <div className="border-t border-[#EAEAEA] mb-6" />

@@ -104,7 +104,7 @@ export default function ParticipantDashboard() {
             </div>
             <p className="text-sm text-[#737373] mt-1">
               {user?.participant?.college || "College not set"}
-              {user?.participant?.department ? ` · ${user.participant.department}` : ""}
+              {user?.participant?.course ? ` · ${user.participant.course}` : ""}
             </p>
           </div>
 

@@ -35,9 +35,7 @@ model Participant {
   phone       String
   college     String
   course      String
-  department  String
   year        String
-  roll_number String?
   created_at  DateTime @default(now())
 
   team_memberships TeamMember[]

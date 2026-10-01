@@ -16,8 +16,8 @@ export default function EditProfilePage() {
   
   const [formData, setFormData] = useState({
     name: "", phone: "",
-    college: "", course: "", department: "",
-    year: "", rollNumber: "",
+    college: "", course: "",
+    year: "",
   });
 
   useEffect(() => {
@@ -31,9 +31,7 @@ export default function EditProfilePage() {
             phone: p.phone || "",
             college: p.college || "",
             course: p.course || "",
-            department: p.department || "",
             year: p.year || "",
-            rollNumber: p.roll_number || "",
           });
         } else if (!data.success) {
           setError("Failed to load profile data.");
@@ -80,9 +78,7 @@ export default function EditProfilePage() {
     { name: "phone",      label: "Phone Number",           type: "tel",  required: true },
     { name: "college",    label: "College / Institute",    type: "text", required: true, colSpan: true },
     { name: "course",     label: "Degree / Course",        type: "text", required: true },
-    { name: "department", label: "Department",             type: "text", required: true },
     { name: "year",       label: "Academic Year",          type: "text", required: true },
-    { name: "rollNumber", label: "Roll / Student ID",      type: "text", required: false },
   ];
 
   if (loading) {

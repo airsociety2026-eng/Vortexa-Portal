@@ -9,9 +9,7 @@ const updateProfileSchema = z.object({
   phone: z.string().min(10, "Valid phone number required"),
   college: z.string().min(2, "College name required"),
   course: z.string().min(2, "Course name required"),
-  department: z.string().min(1, "Department required"),
   year: z.string().min(1, "Academic year required"),
-  rollNumber: z.string().optional(),
 });
 
 export async function PUT(req: NextRequest) {
@@ -31,9 +29,7 @@ export async function PUT(req: NextRequest) {
         phone: validated.phone,
         college: validated.college,
         course: validated.course,
-        department: validated.department,
         year: validated.year,
-        roll_number: validated.rollNumber || null,
       },
     });
 

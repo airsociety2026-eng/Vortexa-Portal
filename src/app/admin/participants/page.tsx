@@ -37,7 +37,6 @@ export default function AdminParticipantsPage() {
     return (
       p.name?.toLowerCase().includes(q) ||
       p.college?.toLowerCase().includes(q) ||
-      p.department?.toLowerCase().includes(q) ||
       p.teamCode?.toLowerCase().includes(q)
     );
   });
@@ -62,7 +61,7 @@ export default function AdminParticipantsPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by participant name, college, department, or team code..."
+          placeholder="Search by participant name, college, course, or team code..."
           className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
         />
       </div>
