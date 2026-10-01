@@ -113,7 +113,7 @@ export default function PaymentPage() {
               <p className="text-[10px] font-semibold text-[#737373] uppercase tracking-widest mb-3">Official UPI Payment</p>
               <div className="border-t border-[#EAEAEA] w-full mb-5" />
               <h3 className="text-lg font-bold text-[#111111] mb-1" style={{ fontFamily: "Manrope, sans-serif" }}>
-                Scan & Pay ?{eventSettings?.payment_amount || 500}
+                Scan & Pay ₹{eventSettings?.payment_amount || 500}
               </h3>
               <p className="text-xs text-[#737373] mb-5">Per team entry fee</p>
               <div className="p-3 border border-[#EAEAEA] rounded-md mb-4">
@@ -159,7 +159,7 @@ export default function PaymentPage() {
                     {[
                       { label: "UTR / Transaction ID", value: payment.utr_number, mono: true },
                       { label: "Payer Name",            value: payment.payer_name },
-                      { label: "Amount Paid",           value: ""₹${payment.amount}`, mono: true },
+                      { label: "Amount Paid",           value: `₹${payment.amount}`, mono: true },
                       { label: "Verified At",           value: new Date(payment.verified_at).toLocaleString() },
                     ].map((item) => (
                       <div key={item.label} className="bg-white border border-[#EAEAEA] rounded-md p-3">
