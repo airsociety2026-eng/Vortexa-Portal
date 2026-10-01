@@ -116,7 +116,7 @@ export default function LandingPage() {
               <ul className="space-y-4 text-sm text-[#4B4B4B]">
                 <li className="flex gap-3"><span className="text-[#1D4ED8] font-bold">1</span> Report at venue & QR Check-in</li>
                 <li className="flex gap-3"><span className="text-[#1D4ED8] font-bold">2</span> Problem Statements Revealed</li>
-                <li className="flex gap-3"><span className="text-[#1D4ED8] font-bold">3</span> 12-Hour Development Phase (Lunch provided)</li>
+                <li className="flex gap-3"><span className="text-[#1D4ED8] font-bold">3</span> 12-Hour Development Phase (Lunch provided once)</li>
                 <li className="flex gap-3"><span className="text-[#1D4ED8] font-bold">4</span> Project Submission</li>
                 <li className="flex gap-3"><span className="text-[#1D4ED8] font-bold">5</span> 9:00 PM: Hackathon Ends. Participants leave venue.</li>
               </ul>
