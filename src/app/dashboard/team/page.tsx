@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Users, UserPlus, Crown, User, Copy, Check, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function TeamManagementPage() {
   const [loading, setLoading] = useState(true);
