@@ -136,7 +136,7 @@ export default function AdminPaymentsPage() {
                       </td>
                       <td className="text-[#262626]">{p.payer_name}</td>
                       <td className="font-mono text-[#111111] font-semibold">{p.utr_number}</td>
-                      <td className="font-mono font-semibold text-[#16803C]">?{p.amount}</td>
+                      <td className="font-mono font-semibold text-[#16803C]">₹{p.amount}</td>
                       <td className="text-[#737373] text-xs">{new Date(p.submitted_at).toLocaleDateString()} {new Date(p.submitted_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</td>
                       <td>
                         <span className={badgeClass(p.status)}>{p.status}</span>

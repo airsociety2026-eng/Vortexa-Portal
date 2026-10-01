@@ -19,7 +19,7 @@ export default function AdminDashboardPage() {
     { label: "Participants",     value: stats?.totalParticipants ?? "—",  sub: "Registered accounts",      icon: Users },
     { label: "Teams",            value: stats?.totalTeams ?? "—",          sub: `${stats?.confirmedTeams ?? 0} confirmed`, icon: UserCheck },
     { label: "Pending Payments", value: stats?.pendingPayments ?? "—",    sub: "Awaiting verification",     icon: CreditCard, urgent: true },
-    { label: "Revenue",          value: `?${stats?.totalRevenue ?? 0}`,   sub: `${stats?.verifiedPayments ?? 0} verified payments`, icon: DollarSign },
+    { label: "Revenue",          value: ""₹${stats?.totalRevenue ?? 0}`,   sub: `${stats?.verifiedPayments ?? 0} verified payments`, icon: DollarSign },
     { label: "Checked In",       value: stats?.checkedInTeams ?? "—",     sub: "Event day check-in",        icon: QrCode },
     { label: "Submissions",      value: stats?.totalSubmissions ?? "—",   sub: "GitHub repos linked",       icon: FolderGit2 },
     { label: "Certificates",     value: stats?.totalCertificates ?? "—",  sub: "Verified PDFs issued",      icon: Award },

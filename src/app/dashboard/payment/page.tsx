@@ -156,7 +156,7 @@ export default function PaymentPage() {
                     {[
                       { label: "UTR / Transaction ID", value: payment.utr_number, mono: true },
                       { label: "Payer Name",            value: payment.payer_name },
-                      { label: "Amount Paid",           value: `?${payment.amount}`, mono: true },
+                      { label: "Amount Paid",           value: ""₹${payment.amount}`, mono: true },
                       { label: "Verified At",           value: new Date(payment.verified_at).toLocaleString() },
                     ].map((item) => (
                       <div key={item.label} className="bg-white border border-[#EAEAEA] rounded-md p-3">

@@ -21,7 +21,7 @@ export function ProgressTracker({ state }: { state: JourneyState }) {
   const steps = [
     { id: "reg",         label: "Registration",  completed: state.registered,            current: false,                              detail: "Account Created" },
     { id: "team",        label: "Team",           completed: state.hasTeam,               current: !state.hasTeam,                     detail: state.hasTeam ? state.teamCode || "Formed" : "Pending" },
-    { id: "payment",     label: "Payment",        completed: state.paymentSubmitted,      current: state.hasTeam && !state.paymentSubmitted, detail: state.paymentSubmitted ? "Uploaded" : "?500 Due" },
+    { id: "payment",     label: "Payment",        completed: state.paymentSubmitted,      current: state.hasTeam && !state.paymentSubmitted, detail: state.paymentSubmitted ? "Uploaded" : "₹500 Due" },
     { id: "verify",      label: "Verification",   completed: state.paymentStatus === "VERIFIED", current: state.paymentStatus === "PENDING", detail: state.paymentStatus === "VERIFIED" ? "Confirmed" : state.paymentStatus === "REJECTED" ? "Rejected" : state.paymentStatus === "PENDING" ? "Under Review" : "Awaiting" },
     { id: "ticket",      label: "Ticket",         completed: state.ticketGenerated,       current: state.paymentStatus === "VERIFIED" && !state.ticketGenerated, detail: state.ticketGenerated ? "QR Active" : "Locked" },
     { id: "checkin",     label: "Check-in",       completed: state.checkedIn,             current: state.ticketGenerated && !state.checkedIn, detail: state.checkedIn ? "Checked In" : "Event Day" },
