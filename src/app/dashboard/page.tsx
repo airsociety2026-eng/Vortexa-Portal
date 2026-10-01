@@ -95,9 +95,14 @@ export default function ParticipantDashboard() {
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
           <div>
             <p className="text-[10px] font-semibold text-[#737373] uppercase tracking-widest mb-2">Participant Dashboard</p>
-            <h1 className="text-2xl font-bold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
-              {user?.name || user?.email || "Participant"}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
+                {user?.name || user?.email || "Participant"}
+              </h1>
+              <Link href="/dashboard/profile" className="text-xs font-semibold text-[#1D4ED8] hover:text-[#1E40AF] bg-[#EFF6FF] hover:bg-[#DBEAFE] px-2 py-1 rounded transition-colors">
+                Edit Profile
+              </Link>
+            </div>
             <p className="text-sm text-[#737373] mt-1">
               {user?.participant?.college || "College not set"}
               {user?.participant?.department ? ` · ${user.participant.department}` : ""}
