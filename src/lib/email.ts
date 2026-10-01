@@ -1,8 +1,14 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { db } from "./db";
 
-// Only initialize Resend if API key is present
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+// Initialize Nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 export async function sendTicketEmail({
   ticketId,
@@ -22,7 +28,7 @@ export async function sendTicketEmail({
   qrCodeUrl: string;
 }): Promise<{ success: boolean; message?: string; error?: string }> {
   
-  const senderEmail = process.env.EMAIL_FROM || "onboarding@resend.dev";
+  const senderEmail = process.env.SMTP_USER || "tickets@vortexa.io";
   const recipientEmail = teamLeaderEmail;
 
   // Build HTML Body Template
@@ -72,39 +78,27 @@ export async function sendTicketEmail({
     </div>
   `;
 
-  if (!resend) {
-    console.error("[Email Error]: RESEND_API_KEY is not configured.");
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.error("[Email Error]: SMTP_USER or SMTP_PASS is not configured.");
     await db.ticket.update({
       where: { id: ticketId },
       data: {
         email_status: "FAILED",
-        email_error: "RESEND_API_KEY missing",
+        email_error: "SMTP credentials missing",
       },
     });
-    return { success: false, error: "RESEND_API_KEY missing" };
+    return { success: false, error: "SMTP credentials missing" };
   }
 
   try {
-    const { data, error } = await resend.emails.send({
+    const info = await transporter.sendMail({
       from: `"VORTEXA Platform" <${senderEmail}>`,
       to: recipientEmail,
       subject: `🎉 VORTEXA 2026 Ticket Confirmed — Team ${teamName} (${teamCode})`,
       html: htmlBody,
     });
 
-    if (error) {
-      console.error("[Resend Delivery Error]:", error.message);
-      await db.ticket.update({
-        where: { id: ticketId },
-        data: {
-          email_status: "FAILED",
-          email_error: error.message,
-        },
-      });
-      return { success: false, error: error.message };
-    }
-
-    console.log(`[Email Sent via Resend] ID: ${data?.id} to ${recipientEmail}`);
+    console.log(`[Email Sent via Nodemailer] ID: ${info.messageId} to ${recipientEmail}`);
 
     await db.ticket.update({
       where: { id: ticketId },
@@ -117,12 +111,12 @@ export async function sendTicketEmail({
 
     return { success: true, message: `Ticket email successfully sent to ${recipientEmail}` };
   } catch (err: any) {
-    console.error("[Resend Network/Unknown Error]:", err.message);
+    console.error("[Nodemailer Error]:", err.message);
     await db.ticket.update({
       where: { id: ticketId },
       data: {
         email_status: "FAILED",
-        email_error: err.message || "Unknown error",
+        email_error: err.message || "Unknown SMTP error",
       },
     });
     return { success: false, error: err.message || "Unknown error" };
