@@ -8,7 +8,7 @@ export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<any | null>(null);
   const [rejectingPayment, setRejectingPayment] = useState<any | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -158,7 +158,7 @@ export default function AdminPaymentsPage() {
                       </td>
                       <td>
                         <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                          <button onClick={() => setSelectedScreenshot(p.screenshot_url)} className="p-1.5 rounded-md border border-[#EAEAEA] text-[#737373] hover:border-[#1D4ED8] hover:text-[#1D4ED8] transition-colors" title="View screenshot">
+                          <button onClick={() => setSelectedPayment(p)} className="p-1.5 rounded-md border border-[#EAEAEA] text-[#737373] hover:border-[#1D4ED8] hover:text-[#1D4ED8] transition-colors" title="View details and screenshot">
                             <Eye className="w-3.5 h-3.5" />
                           </button>
                           {p.status !== "VERIFIED" && (
@@ -188,24 +188,40 @@ export default function AdminPaymentsPage() {
       )}
 
       {/* Screenshot Modal */}
-      {selectedScreenshot && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setSelectedScreenshot(null)}>
+      {selectedPayment && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setSelectedPayment(null)}>
           <div className="bg-white max-w-2xl w-full p-5 rounded-lg border border-[#EAEAEA] space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between pb-3 border-b border-[#EAEAEA]">
-              <h3 className="text-sm font-semibold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif" }}>Payment Screenshot Proof</h3>
-              <button onClick={() => setSelectedScreenshot(null)} className="text-[#737373] hover:text-[#111111] text-lg leading-none">✕</button>
+              <h3 className="text-sm font-semibold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif" }}>Payment Details — {selectedPayment.team?.team_name}</h3>
+              <button onClick={() => setSelectedPayment(null)} className="text-[#737373] hover:text-[#111111] text-lg leading-none">✕</button>
             </div>
-            <div className="bg-[#F7F7F5] rounded-md flex items-center justify-center min-h-[200px] max-h-[65vh] overflow-hidden">
-              {selectedScreenshot.startsWith("/uploads/") || selectedScreenshot === "" ? (
+            
+            <div className="grid grid-cols-3 gap-4 mb-4 text-xs bg-[#F7F7F5] p-3 rounded-md border border-[#DCDCDC]">
+              <div>
+                <p className="text-[#737373] font-semibold uppercase tracking-wider text-[10px] mb-1">Payer Name</p>
+                <p className="font-medium text-[#111111]">{selectedPayment.payer_name}</p>
+              </div>
+              <div>
+                <p className="text-[#737373] font-semibold uppercase tracking-wider text-[10px] mb-1">UTR Number</p>
+                <p className="font-mono font-medium text-[#1D4ED8]">{selectedPayment.utr_number}</p>
+              </div>
+              <div>
+                <p className="text-[#737373] font-semibold uppercase tracking-wider text-[10px] mb-1">Amount</p>
+                <p className="font-mono font-medium text-[#16803C]">₹{selectedPayment.amount}</p>
+              </div>
+            </div>
+
+            <div className="bg-[#F7F7F5] rounded-md flex items-center justify-center min-h-[200px] max-h-[50vh] overflow-hidden">
+              {!selectedPayment.screenshot_url || selectedPayment.screenshot_url.startsWith("/uploads/") ? (
                 <div className="text-center py-10 text-[#737373]">
                   <p className="text-sm font-semibold">No screenshot available</p>
                   <p className="text-xs mt-1">This payment was submitted before image upload was available,<br/>or the file was stored on the old server and is no longer accessible.</p>
                 </div>
               ) : (
                 <img
-                  src={selectedScreenshot}
+                  src={selectedPayment.screenshot_url}
                   alt="Payment Proof"
-                  className="max-h-[60vh] object-contain rounded"
+                  className="max-h-[50vh] object-contain rounded"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = "none";
                     (e.target as HTMLImageElement).parentElement!.innerHTML =
