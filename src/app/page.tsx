@@ -35,10 +35,10 @@ export default function LandingPage() {
             A 12-hour offline hackathon bringing together students, developers, innovators, and problem-solvers to build technology-driven solutions to real-world challenges.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 items-center sm:items-stretch mb-4">
             <Link
               href="/register"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#1D4ED8] text-white text-sm font-semibold rounded-md hover:bg-[#1E40AF] transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#1D4ED8] text-white text-sm font-semibold rounded-md hover:bg-[#1E40AF] transition-colors shadow-sm"
             >
               Complete Official Registration
               <ArrowRight className="w-4 h-4" />
@@ -50,6 +50,9 @@ export default function LandingPage() {
               Sign In to Dashboard
             </Link>
           </div>
+          <p className="text-xs font-semibold text-[#B42318] bg-[#FEF3F2] inline-block px-3 py-1.5 rounded-md border border-[#FECACA]">
+            ⚠️ Registration is strictly limited to the first 100 teams.
+          </p>
         </div>
       </section>
 
@@ -68,7 +71,7 @@ export default function LandingPage() {
             {[
               { icon: Calendar, title: "Dates", desc: "11 Oct: 12-Hour Hackathon\n12 Oct: Evaluation & Results" },
               { icon: MapPin, title: "Venue", desc: "Dr. D. Y. Patil Institute of Technology\nPimpri, Pune, Maharashtra (Offline)" },
-              { icon: Users, title: "Team Size", desc: "2 to 4 members per team.\nOne designated Team Leader." },
+              { icon: Users, title: "Team Capacity", desc: "2 to 4 members per team.\nLimited strictly to 100 teams." },
               { icon: Wallet, title: "Registration Fee", desc: "₹625 per team.\nTotal fee regardless of team size." },
               { icon: Trophy, title: "Prize Pool", desc: "Up to ₹75,000*\nPlus certificates for eligible participants." },
               { icon: Clock, title: "Shortlisting", desc: "No elimination round.\nDirect participation for verified teams." },
