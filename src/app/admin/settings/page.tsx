@@ -174,21 +174,32 @@ export default function AdminSettingsPage() {
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
-                        if (file.size > 2 * 1024 * 1024) {
-                          alert("Image must be under 2MB");
+                        if (file.size > 10 * 1024 * 1024) {
+                          alert("Image must be under 10MB");
                           return;
                         }
-                        setMsg("Reading image...");
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                          setUpiQrUrl(reader.result as string);
+                        setMsg("Compressing image...");
+                        const img = new Image();
+                        const objectUrl = URL.createObjectURL(file);
+                        img.onload = () => {
+                          URL.revokeObjectURL(objectUrl);
+                          const MAX = 600; // QR codes don't need to be large
+                          let w = img.width, h = img.height;
+                          if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                          if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+                          const canvas = document.createElement("canvas");
+                          canvas.width = w; canvas.height = h;
+                          canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+                          const compressed = canvas.toDataURL("image/jpeg", 0.85);
+                          setUpiQrUrl(compressed);
                           setMsg("Image ready! Click Save to apply.");
                         };
-                        reader.onerror = () => alert("Failed to read image file");
-                        reader.readAsDataURL(file);
+                        img.onerror = () => alert("Failed to load image");
+                        img.src = objectUrl;
                       }}
                     />
                   </label>
+
                 </div>
                 {upiQrUrl && (
                   <div className="mt-3 p-2 border border-white/10 rounded-lg inline-block bg-black/20">

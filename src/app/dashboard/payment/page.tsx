@@ -231,14 +231,29 @@ export default function PaymentPage() {
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (!file) return;
-                              if (file.size > 5 * 1024 * 1024) {
-                                alert("Image must be under 5MB");
+                              if (file.size > 10 * 1024 * 1024) {
+                                alert("Image must be under 10MB");
                                 return;
                               }
-                              const reader = new FileReader();
-                              reader.onload = () => setScreenshotUrl(reader.result as string);
-                              reader.onerror = () => alert("Failed to read image file");
-                              reader.readAsDataURL(file);
+                              setSuccess("Compressing image...");
+                              const img = new Image();
+                              const objectUrl = URL.createObjectURL(file);
+                              img.onload = () => {
+                                URL.revokeObjectURL(objectUrl);
+                                const MAX = 1200;
+                                let w = img.width, h = img.height;
+                                if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                                if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+                                const canvas = document.createElement("canvas");
+                                canvas.width = w; canvas.height = h;
+                                canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+                                const compressed = canvas.toDataURL("image/jpeg", 0.75);
+                                const kb = Math.round(compressed.length * 0.75 / 1024);
+                                setScreenshotUrl(compressed);
+                                setSuccess(`Image ready (${kb} KB). Click Submit to save.`);
+                              };
+                              img.onerror = () => alert("Failed to load image");
+                              img.src = objectUrl;
                             }}
                           />
                         </label>
