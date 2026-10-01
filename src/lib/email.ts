@@ -69,6 +69,16 @@ export async function sendTicketEmail({
         <p style="color: #9ca3af; font-size: 13px; line-height: 1.5;">
           Please keep this ticket safely. Present the QR code on your phone or printed copy at the main entrance check-in desk on event day.
         </p>
+
+        <div style="background-color: #064e3b; padding: 20px; border-radius: 12px; margin: 25px 0; border: 1px solid #059669; text-align: center;">
+          <h3 style="color: #ffffff; margin-top: 0; font-size: 16px; margin-bottom: 10px;">📱 Join the Official WhatsApp Group</h3>
+          <p style="color: #d1fae5; font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
+            All important announcements, event updates, and direct support from the organizers will be shared here. <strong>Mandatory for team leaders.</strong>
+          </p>
+          <a href="https://chat.whatsapp.com/INSERT_YOUR_LINK_HERE" style="display: inline-block; background-color: #25D366; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 24px; border-radius: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
+            Join WhatsApp Group
+          </a>
+        </div>
       </div>
 
       <div style="text-align: center; padding-top: 20px; border-top: 1px solid #1f2937; color: #6b7280; font-size: 12px;">
