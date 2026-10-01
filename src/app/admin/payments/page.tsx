@@ -13,6 +13,7 @@ export default function AdminPaymentsPage() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const fetchPayments = () => {
     fetch("/api/payments/list")
@@ -29,34 +30,34 @@ export default function AdminPaymentsPage() {
   useEffect(() => { fetchPayments(); }, []);
 
   const handleVerify = async (paymentId: string) => {
-    setSubmitting(true); setMessage("");
+    setSubmitting(true); setMessage(""); setErrorMsg("");
     try {
       const res = await fetch("/api/payments/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paymentId }) });
       const data = await res.json();
-      if (data.success) { setMessage(data.message); fetchPayments(); } else alert(data.error?.message || "Failed to verify");
-    } catch { alert("Error verifying payment"); } finally { setSubmitting(false); }
+      if (data.success) { setMessage(data.message); fetchPayments(); } else setErrorMsg(data.error?.message || "Failed to verify");
+    } catch { setErrorMsg("Error verifying payment"); } finally { setSubmitting(false); }
   };
 
   const handleRejectSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rejectingPayment || !rejectionReason.trim()) return;
-    setSubmitting(true);
+    setSubmitting(true); setMessage(""); setErrorMsg("");
     try {
       const res = await fetch("/api/payments/reject", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paymentId: rejectingPayment.id, rejectionReason }) });
       const data = await res.json();
       if (data.success) { setMessage(data.message); setRejectingPayment(null); setRejectionReason(""); fetchPayments(); }
-      else alert(data.error?.message || "Failed to reject");
-    } catch { alert("Error"); } finally { setSubmitting(false); }
+      else setErrorMsg(data.error?.message || "Failed to reject");
+    } catch { setErrorMsg("Error rejecting payment"); } finally { setSubmitting(false); }
   };
 
   const handleResendEmail = async (paymentId: string) => {
-    setSubmitting(true); setMessage("");
+    setSubmitting(true); setMessage(""); setErrorMsg("");
     try {
       const res = await fetch("/api/payments/resend-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paymentId }) });
       const data = await res.json();
       if (data.success) { setMessage(data.message || "Email resent."); fetchPayments(); }
-      else alert(typeof data.error === "string" ? data.error : data.error?.message || "Failed");
-    } catch { alert("Error"); } finally { setSubmitting(false); }
+      else setErrorMsg(typeof data.error === "string" ? data.error : data.error?.message || "Failed to resend email");
+    } catch { setErrorMsg("Error resending email"); } finally { setSubmitting(false); }
   };
 
   const filtered = payments.filter((p) => {
@@ -90,6 +91,12 @@ export default function AdminPaymentsPage() {
       </div>
 
       {message && <div className="px-4 py-3 bg-[#ECFDF3] border border-[#BBF7D0] rounded-md text-xs font-medium text-[#16803C]">{message}</div>}
+      {errorMsg && (
+        <div className="px-4 py-3 bg-[#FEF3F2] border border-[#FECACA] rounded-md text-xs font-medium text-[#B42318] flex items-start gap-2">
+          <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
 
       {/* Filter */}
       <div className="flex flex-col sm:flex-row gap-2">
