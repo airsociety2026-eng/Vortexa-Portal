@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       teamName: payment.team.team_name,
       membersList: memberNames.length > 0 ? memberNames : ["Team Leader"],
       ticketCode: ticket.ticket_code,
-      qrCodeUrl: `https://quickchart.io/qr?text=${encodeURIComponent(ticket.ticket_code)}&size=300`,
+      qrCodeUrl: `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(ticket.ticket_code)}&choe=UTF-8`,
     });
 
     await logAuditAction({

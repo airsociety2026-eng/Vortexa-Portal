@@ -127,7 +127,7 @@ export default function TicketPage() {
               <div className="flex flex-col items-center text-center">
                 <div className="p-4 bg-white border border-[#EAEAEA] rounded-md mb-3">
                   <img
-                    src={ticket.qr_code_url || `https://quickchart.io/qr?text=${ticket.ticket_code}&size=300`}
+                    src={ticket.qr_code_url || `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(ticket.ticket_code)}&choe=UTF-8`}
                     alt="Ticket QR Code"
                     className="w-36 h-36 object-contain"
                   />
