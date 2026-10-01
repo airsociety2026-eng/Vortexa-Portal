@@ -295,6 +295,12 @@ export default function PaymentPage() {
                 </form>
               )}
             </div>
+            
+            <div className="flex justify-end pt-2">
+              <Link href="/dashboard/ticket" className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-semibold rounded-md transition-colors shadow-sm">
+                Next: View Ticket <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         )}
       </main>

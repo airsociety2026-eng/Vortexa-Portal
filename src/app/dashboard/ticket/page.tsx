@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function TicketPage() {
@@ -141,6 +141,14 @@ export default function TicketPage() {
               </div>
             </div>
           </div>
+          
+          {ticket && (
+            <div className="flex justify-end pt-2">
+              <Link href="/dashboard/room" className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-semibold rounded-md transition-colors shadow-sm">
+                Next: Room & Check-in <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
         )}
       </main>
 

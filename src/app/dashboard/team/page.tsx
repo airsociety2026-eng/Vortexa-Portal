@@ -126,6 +126,12 @@ export default function TeamManagementPage() {
                 ))}
               </div>
             </div>
+            
+            <div className="flex justify-end pt-2">
+              <Link href="/dashboard/payment" className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] text-white text-xs font-semibold rounded-md transition-colors shadow-sm">
+                Next: Proceed to Payment <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         ) : (
           /* No Team */

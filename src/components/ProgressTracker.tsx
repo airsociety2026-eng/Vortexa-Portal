@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, Circle, Clock } from "lucide-react";
+import Link from "next/link";
 
 export interface JourneyState {
   registered: boolean;
@@ -41,32 +42,49 @@ export function ProgressTracker({ state }: { state: JourneyState }) {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2">
-        {steps.map((step) => (
-          <div
-            key={step.id}
-            className={`flex flex-col items-center p-2.5 rounded-md border text-center ${
-              step.completed
-                ? "bg-[#ECFDF3] border-[#BBF7D0]"
-                : step.current
-                ? "bg-[#EFF6FF] border-[#BFDBFE]"
-                : "bg-[#F7F7F5] border-[#EAEAEA]"
-            }`}
-          >
-            <div className="mb-1.5">
-              {step.completed ? (
-                <CheckCircle2 className="w-4 h-4 text-[#16803C]" />
-              ) : step.current ? (
-                <Clock className="w-4 h-4 text-[#1D4ED8]" />
-              ) : (
-                <Circle className="w-4 h-4 text-[#DCDCDC]" />
-              )}
-            </div>
-            <span className={`text-[10px] font-semibold leading-tight ${step.completed ? "text-[#16803C]" : step.current ? "text-[#1D4ED8]" : "text-[#737373]"}`}>
-              {step.label}
-            </span>
-            <span className="text-[9px] mt-0.5 text-[#A3A3A3] leading-tight">{step.detail}</span>
-          </div>
-        ))}
+        {steps.map((step) => {
+          const hrefMap: Record<string, string> = {
+            reg: "/dashboard/profile",
+            team: "/dashboard/team",
+            payment: "/dashboard/payment",
+            verify: "/dashboard/payment",
+            ticket: "/dashboard/ticket",
+            checkin: "/dashboard/room",
+            room: "/dashboard/room",
+            submission: "/dashboard/submission",
+            results: "/dashboard/results",
+            certificate: "/dashboard/certificate",
+          };
+          const targetHref = hrefMap[step.id] || "/dashboard";
+
+          return (
+            <Link
+              href={targetHref}
+              key={step.id}
+              className={`flex flex-col items-center p-2.5 rounded-md border text-center transition-colors hover:shadow-sm ${
+                step.completed
+                  ? "bg-[#ECFDF3] border-[#BBF7D0] hover:bg-[#DCFCE7]"
+                  : step.current
+                  ? "bg-[#EFF6FF] border-[#BFDBFE] hover:bg-[#DBEAFE] ring-1 ring-[#3B82F6]"
+                  : "bg-[#F7F7F5] border-[#EAEAEA] hover:bg-[#F3F4F6]"
+              }`}
+            >
+              <div className="mb-1.5">
+                {step.completed ? (
+                  <CheckCircle2 className="w-4 h-4 text-[#16803C]" />
+                ) : step.current ? (
+                  <Clock className="w-4 h-4 text-[#1D4ED8]" />
+                ) : (
+                  <Circle className="w-4 h-4 text-[#DCDCDC]" />
+                )}
+              </div>
+              <span className={`text-[10px] font-semibold leading-tight ${step.completed ? "text-[#16803C]" : step.current ? "text-[#1D4ED8]" : "text-[#737373]"}`}>
+                {step.label}
+              </span>
+              <span className="text-[9px] mt-0.5 text-[#A3A3A3] leading-tight">{step.detail}</span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
