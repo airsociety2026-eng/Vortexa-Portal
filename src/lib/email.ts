@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import QRCode from "qrcode";
 import { db } from "./db";
 
 // Initialize Nodemailer transporter
@@ -92,11 +91,15 @@ export async function sendTicketEmail({
   }
 
   try {
-    let qrAttachment = null;
+    let qrAttachment: Buffer | null = null;
     try {
-      qrAttachment = await QRCode.toDataURL(ticketCode, { width: 300, margin: 2, color: { dark: '#000000', light: '#ffffff' } });
+      const qrResponse = await fetch(`https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(ticketCode)}&choe=UTF-8`);
+      if (qrResponse.ok) {
+        const arrayBuffer = await qrResponse.arrayBuffer();
+        qrAttachment = Buffer.from(arrayBuffer);
+      }
     } catch (e) {
-      console.error("[Email Error] Failed to generate QR code attachment", e);
+      console.error("[Email Error] Failed to fetch QR code attachment", e);
     }
 
     const info = await transporter.sendMail({
@@ -107,7 +110,7 @@ export async function sendTicketEmail({
       attachments: qrAttachment ? [
         {
           filename: 'ticket-qr.png',
-          path: qrAttachment,
+          content: qrAttachment,
           cid: 'ticket-qr'
         }
       ] : [],
