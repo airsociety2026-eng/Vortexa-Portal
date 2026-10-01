@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     });
 
     let ticketCode = existingTicket?.ticket_code || generateTicketCode();
-    const qrUrl = existingTicket?.qr_code_url || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(ticketCode)}`;
+    const qrUrl = existingTicket?.qr_code_url || `https://quickchart.io/qr?text=${encodeURIComponent(ticketCode)}&size=300`;
 
     const ticket = await db.ticket.upsert({
       where: { team_id: payment.team_id },

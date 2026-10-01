@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       teamName: payment.team.team_name,
       membersList: memberNames.length > 0 ? memberNames : ["Team Leader"],
       ticketCode: ticket.ticket_code,
-      qrCodeUrl: ticket.qr_code_url || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(ticket.ticket_code)}`,
+      qrCodeUrl: `https://quickchart.io/qr?text=${encodeURIComponent(ticket.ticket_code)}&size=300`,
     });
 
     await logAuditAction({
