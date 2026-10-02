@@ -92,12 +92,20 @@ export default function AdminTeamsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((t) => (
-                  <tr key={t.id}>
-                    <td>
-                      <div className="font-bold text-foreground">{t.team_name}</div>
-                      <span className="font-mono text-primary text-[11px]">{t.team_code}</span>
-                    </td>
+                {filtered.map((t) => {
+                  const leader = t.members?.find((m: any) => m.role === "LEADER" || m.participant?.user_id === t.leader_id);
+                  const leaderPhone = leader?.participant?.phone || "N/A";
+                  return (
+                    <tr key={t.id}>
+                      <td>
+                        <div className="font-bold text-foreground">{t.team_name}</div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="font-mono text-primary text-[11px]">{t.team_code}</span>
+                          <span className="text-[10px] text-slate-500 border-l border-slate-200 pl-2">
+                            📞 {leaderPhone}
+                          </span>
+                        </div>
+                      </td>
                     <td className="font-bold">{t.members?.length || 0} / 4</td>
                     <td>
                       <span
