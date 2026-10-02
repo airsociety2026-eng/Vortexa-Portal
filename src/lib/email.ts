@@ -196,13 +196,13 @@ export async function sendReminderEmail({
 
   try {
     const info = await transporter.sendMail({
-      from: \`"VORTEXA Platform" <\${senderEmail}>\`,
+      from: `"VORTEXA Platform" <${senderEmail}>`,
       to: recipientEmail,
-      subject: \`⚠️ Action Required: Payment Pending for Team \${teamName}\`,
+      subject: `⚠️ Action Required: Payment Pending for Team ${teamName}`,
       html: htmlBody,
     });
-    console.log(\`[Reminder Email Sent] ID: \${info.messageId} to \${recipientEmail}\`);
-    return { success: true, message: \`Reminder email sent to \${recipientEmail}\` };
+    console.log(`[Reminder Email Sent] ID: ${info.messageId} to ${recipientEmail}`);
+    return { success: true, message: `Reminder email sent to ${recipientEmail}` };
   } catch (err: any) {
     console.error("[Nodemailer Error]:", err.message);
     return { success: false, error: err.message || "Unknown SMTP error" };
