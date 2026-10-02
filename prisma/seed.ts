@@ -311,16 +311,8 @@ async function main() {
     data: [
       {
         title: "🚀 Welcome to VORTEXA 2026!",
-        message: "Registration is officially open! Form your teams (1-4 members) and complete your payment verification early to secure fast-track check-in.",
+        message: "Registration is officially open! Form your teams (2-4 members) and complete your payment verification early to secure fast-track check-in.",
         priority: "IMPORTANT",
-        target_audience: "ALL",
-        is_published: true,
-        created_by: adminUser.id,
-      },
-      {
-        title: "⚡ WiFi & Network Credentials Released",
-        message: "Connect to SSID 'VORTEXA_GUEST_5G' with password 'VortexaHack2026!'. High-bandwidth ports are open.",
-        priority: "URGENT",
         target_audience: "ALL",
         is_published: true,
         created_by: adminUser.id,

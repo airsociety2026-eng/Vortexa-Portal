@@ -66,7 +66,7 @@ export default function TeamManagementPage() {
           <h1 className="text-2xl font-bold text-[#111111]" style={{ fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
             Team Management
           </h1>
-          <p className="text-sm text-[#737373] mt-1">Form a team of 1–4 members. Share your Team Code for others to join.</p>
+          <p className="text-sm text-[#737373] mt-1">Form a team of 2–4 members. Share your Team Code for others to join.</p>
         </div>
 
         {error   && <div className="mb-5 px-4 py-3 bg-[#FEF3F2] border border-[#FECACA] rounded-md text-xs font-medium text-[#B42318]">{error}</div>}

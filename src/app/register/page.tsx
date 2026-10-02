@@ -66,7 +66,7 @@ export default function RegisterPage() {
               Create Account
             </h1>
             <p className="text-sm text-[#737373] mt-1">
-              Register your participant profile to form or join a team of 1–4 members.
+              Register your participant profile to form or join a team of 2–4 members.
             </p>
           </div>
 
