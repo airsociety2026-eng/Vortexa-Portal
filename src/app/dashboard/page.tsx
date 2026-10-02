@@ -56,37 +56,9 @@ export default function ParticipantDashboard() {
     );
   }
 
-  const navLinks = [
-    { href: "/dashboard",             label: "Overview" },
-    { href: "/dashboard/team",        label: "1. Team" },
-    { href: "/dashboard/payment",     label: "2. Payment" },
-    { href: "/dashboard/ticket",      label: "3. Ticket" },
-    { href: "/dashboard/room",        label: "4. Room" },
-    { href: "/dashboard/problems",    label: "5. Tracks" },
-    { href: "/dashboard/results",     label: "6. Results" },
-    { href: "/dashboard/certificate", label: "7. Certificate" },
-  ];
-
   return (
     <div className="min-h-screen flex flex-col bg-[#F7F7F5] text-[#111111]">
       <Navbar />
-
-      {/* Sub Nav */}
-      <div className="bg-white border-b border-[#EAEAEA] sticky top-14 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 overflow-x-auto py-0 h-10 scrollbar-none">
-            {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="px-3 py-1.5 text-xs font-medium text-[#737373] hover:text-[#111111] hover:bg-[#F7F7F5] rounded-md whitespace-nowrap transition-colors"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
 

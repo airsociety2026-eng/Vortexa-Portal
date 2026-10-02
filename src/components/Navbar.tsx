@@ -147,6 +147,38 @@ export function Navbar() {
           )}
         </div>
       )}
+      {/* Participant Dashboard Sub-Navigation */}
+      {pathname.startsWith("/dashboard") && (
+        <div className="bg-white border-b border-[#EAEAEA] w-full hidden md:block">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-none">
+              {[
+                { href: "/dashboard",             label: "Overview" },
+                { href: "/dashboard/team",        label: "1. Team" },
+                { href: "/dashboard/payment",     label: "2. Payment" },
+                { href: "/dashboard/ticket",      label: "3. Ticket" },
+                { href: "/dashboard/room",        label: "4. Room" },
+                { href: "/dashboard/problems",    label: "5. Tracks" },
+                { href: "/dashboard/results",     label: "6. Results" },
+                { href: "/dashboard/certificate", label: "7. Certificate" },
+              ].map(({ href, label }) => {
+                const isActive = pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`px-3 py-1.5 text-[11px] font-bold rounded-md whitespace-nowrap transition-colors tracking-wide uppercase ${
+                      isActive ? "bg-[#1D4ED8] text-white" : "text-[#737373] hover:text-[#111111] hover:bg-[#F7F7F5]"
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
