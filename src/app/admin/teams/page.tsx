@@ -133,7 +133,8 @@ export default function AdminTeamsPage() {
                       )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
