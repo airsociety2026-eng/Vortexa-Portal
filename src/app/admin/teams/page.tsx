@@ -26,13 +26,13 @@ export default function AdminTeamsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between glass-card p-6 rounded-2xl border border-white/10">
+      <div className="flex items-center justify-between glass-card p-6 rounded-2xl">
         <div>
-          <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
-            <UserCheck className="w-6 h-6 text-purple-400" />
+          <h1 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
+            <UserCheck className="w-6 h-6 text-primary" />
             <span>Teams Directory</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted mt-1">
             Search and inspect all hackathon teams, members, payment statuses, tickets, and check-in records.
           </p>
         </div>
@@ -51,32 +51,32 @@ export default function AdminTeamsPage() {
 
       {loading ? (
         <div className="py-16 text-center glass-card rounded-2xl">
-          <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-xs text-slate-400">Loading teams...</p>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-muted">Loading teams...</p>
         </div>
       ) : (
-        <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+        <div className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-900/80 text-slate-400 font-mono text-[10px] uppercase border-b border-white/10">
+            <table className="vx-table">
+              <thead>
                 <tr>
-                  <th className="p-4">Team Code & Name</th>
-                  <th className="p-4">Members Count</th>
-                  <th className="p-4">Payment Status</th>
-                  <th className="p-4">Ticket QR</th>
-                  <th className="p-4">Check-in</th>
-                  <th className="p-4">Room</th>
+                  <th>Team Code & Name</th>
+                  <th>Members Count</th>
+                  <th>Payment Status</th>
+                  <th>Ticket QR</th>
+                  <th>Check-in</th>
+                  <th>Room</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody>
                 {filtered.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-800/40 transition">
-                    <td className="p-4">
-                      <div className="font-bold text-white">{t.team_name}</div>
-                      <span className="font-mono text-cyan-400 text-[11px]">{t.team_code}</span>
+                  <tr key={t.id}>
+                    <td>
+                      <div className="font-bold text-foreground">{t.team_name}</div>
+                      <span className="font-mono text-primary text-[11px]">{t.team_code}</span>
                     </td>
-                    <td className="p-4 font-bold text-slate-200">{t.members?.length || 0} / 4</td>
-                    <td className="p-4">
+                    <td className="font-bold">{t.members?.length || 0} / 4</td>
+                    <td>
                       <span
                         className={`px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold ${
                           t.payment?.status === "VERIFIED" ? "badge-confirmed" : "badge-pending"
@@ -85,9 +85,9 @@ export default function AdminTeamsPage() {
                         {t.payment?.status || "NOT_SUBMITTED"}
                       </span>
                     </td>
-                    <td className="p-4 font-mono text-slate-400">{t.ticket ? "ACTIVE" : "LOCKED"}</td>
-                    <td className="p-4 font-mono">{t.checkin ? "✓ CHECKED IN" : "PENDING"}</td>
-                    <td className="p-4 font-bold text-slate-200">
+                    <td className="font-mono text-muted">{t.ticket ? "ACTIVE" : "LOCKED"}</td>
+                    <td className="font-mono">{t.checkin ? "✓ CHECKED IN" : "PENDING"}</td>
+                    <td className="font-bold">
                       {t.room_allocation?.room?.room_name || "Unassigned"}
                     </td>
                   </tr>

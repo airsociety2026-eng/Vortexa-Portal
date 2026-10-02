@@ -43,20 +43,20 @@ export default function AdminParticipantsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between glass-card p-6 rounded-2xl border border-white/10">
+      <div className="flex items-center justify-between glass-card p-6 rounded-2xl">
         <div>
-          <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
-            <Users className="w-6 h-6 text-cyan-400" />
+          <h1 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
+            <Users className="w-6 h-6 text-primary" />
             <span>Participants Directory</span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted mt-1">
             View all registered participants across colleges, courses, and hackathon teams.
           </p>
         </div>
       </div>
 
       <div className="relative">
-        <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500" />
+        <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-muted" />
         <input
           type="text"
           value={search}
@@ -68,34 +68,34 @@ export default function AdminParticipantsPage() {
 
       {loading ? (
         <div className="py-16 text-center glass-card rounded-2xl">
-          <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-xs text-slate-400">Loading directory...</p>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-muted">Loading directory...</p>
         </div>
       ) : (
-        <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+        <div className="glass-card rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-900/80 text-slate-400 font-mono text-[10px] uppercase border-b border-white/10">
+            <table className="vx-table">
+              <thead>
                 <tr>
-                  <th className="p-4">Name</th>
-                  <th className="p-4">College</th>
-                  <th className="p-4">Course & Year</th>
-                  <th className="p-4">Phone</th>
-                  <th className="p-4">Team</th>
+                  <th>Name</th>
+                  <th>College</th>
+                  <th>Course & Year</th>
+                  <th>Phone</th>
+                  <th>Team</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody>
                 {filtered.map((p, idx) => (
-                  <tr key={idx} className="hover:bg-slate-800/40 transition">
-                    <td className="p-4 font-bold text-white">{p.name}</td>
-                    <td className="p-4 text-slate-300">{p.college}</td>
-                    <td className="p-4 text-slate-400 font-mono">
+                  <tr key={idx}>
+                    <td className="font-bold text-foreground">{p.name}</td>
+                    <td className="text-muted">{p.college}</td>
+                    <td className="text-muted font-mono">
                       {p.course} ({p.year})
                     </td>
-                    <td className="p-4 font-mono text-slate-400">{p.phone}</td>
-                    <td className="p-4">
-                      <span className="font-bold text-white block">{p.teamName}</span>
-                      <span className="font-mono text-cyan-400 text-[11px]">{p.teamCode}</span>
+                    <td className="font-mono text-muted">{p.phone}</td>
+                    <td>
+                      <span className="font-bold text-foreground block">{p.teamName}</span>
+                      <span className="font-mono text-primary text-[11px]">{p.teamCode}</span>
                     </td>
                   </tr>
                 ))}
