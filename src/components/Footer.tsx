@@ -14,11 +14,11 @@ export function Footer() {
                 <span className="text-white text-[10px] font-bold">V</span>
               </div>
               <span className="font-bold text-sm tracking-tight text-[#111111]" style={{ fontFamily: "Manrope, sans-serif", fontWeight: 800 }}>
-                VORTEXA 2026
+                VORTEXA 3.0
               </span>
             </div>
             <p className="text-xs text-[#737373] leading-relaxed">
-              The premier coding hackathon of the year, bringing together the best minds to solve real-world problems.
+              A 12-hour offline hackathon bringing together students, developers, innovators, and problem-solvers.
             </p>
           </div>
 
@@ -54,9 +54,7 @@ export function Footer() {
         <div className="border-t border-[#EAEAEA] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[#737373]">© 2026 VORTEXA. All rights reserved.</p>
           <div className="flex items-center gap-5 text-xs text-[#737373]">
-            <span>Security Verified</span>
-            <span>RBAC Protected</span>
-            <span>Prisma Engine</span>
+            <span>Organized by AIRS</span>
           </div>
         </div>
       </div>

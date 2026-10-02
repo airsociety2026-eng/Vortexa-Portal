@@ -150,3 +150,61 @@ export async function sendTicketEmail({
     return { success: false, error: err.message || "Unknown error" };
   }
 }
+
+export async function sendReminderEmail({
+  teamLeaderEmail,
+  teamCode,
+  teamName,
+}: {
+  teamLeaderEmail: string;
+  teamCode: string;
+  teamName: string;
+}): Promise<{ success: boolean; message?: string; error?: string }> {
+  const senderEmail = process.env.SMTP_USER || "tickets@vortexa.io";
+  const recipientEmail = teamLeaderEmail;
+
+  const htmlBody = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #090d16; color: #f3f4f6; padding: 30px; max-width: 600px; margin: 0 auto; border-radius: 16px; border: 1px solid #1f2937;">
+      <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #1f2937;">
+        <h1 style="color: #06b6d4; margin: 0; font-size: 28px; letter-spacing: 2px;">VORTEXA 2026</h1>
+        <p style="color: #ef4444; font-weight: bold; margin-top: 5px; font-size: 14px;">Action Required: Payment Pending</p>
+      </div>
+
+      <div style="padding: 20px 0;">
+        <h2 style="color: #ffffff; font-size: 20px; margin-top: 0;">Payment Reminder</h2>
+        <p style="color: #9ca3af; font-size: 14px; line-height: 1.6;">
+          Dear Team Leader of <strong>${teamName}</strong> (${teamCode}),
+        </p>
+        <p style="color: #9ca3af; font-size: 14px; line-height: 1.6;">
+          This is a reminder that your team's registration payment is either not submitted or currently pending verification. To secure your spot and receive your ticket, please ensure that your payment is completed and details are submitted on the portal as soon as possible.
+        </p>
+        <p style="color: #9ca3af; font-size: 14px; line-height: 1.6;">
+          If you have already submitted the payment, please wait while our team verifies it. If you haven't, please log in to your dashboard to complete the payment.
+        </p>
+      </div>
+
+      <div style="text-align: center; padding-top: 20px; border-top: 1px solid #1f2937; color: #6b7280; font-size: 12px;">
+        <p style="margin: 0;">Regards,<br /><strong style="color: #9ca3af;">VORTEXA Organizing Team</strong></p>
+      </div>
+    </div>
+  `;
+
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.error("[Email Error]: SMTP_USER or SMTP_PASS is not configured.");
+    return { success: false, error: "SMTP credentials missing" };
+  }
+
+  try {
+    const info = await transporter.sendMail({
+      from: \`"VORTEXA Platform" <\${senderEmail}>\`,
+      to: recipientEmail,
+      subject: \`⚠️ Action Required: Payment Pending for Team \${teamName}\`,
+      html: htmlBody,
+    });
+    console.log(\`[Reminder Email Sent] ID: \${info.messageId} to \${recipientEmail}\`);
+    return { success: true, message: \`Reminder email sent to \${recipientEmail}\` };
+  } catch (err: any) {
+    console.error("[Nodemailer Error]:", err.message);
+    return { success: false, error: err.message || "Unknown SMTP error" };
+  }
+}
