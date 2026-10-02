@@ -13,7 +13,7 @@ export default function PaymentPage() {
   const [payerName, setPayerName] = useState("");
   const [upiId, setUpiId] = useState("");
   const [utrNumber, setUtrNumber] = useState("");
-  const [amount, setAmount] = useState(500);
+  const [amount, setAmount] = useState(625);
   const [screenshotUrl, setScreenshotUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -37,7 +37,7 @@ export default function PaymentPage() {
       }
       if (sData.success && sData.data) {
         setEventSettings(sData.data);
-        if (!tData.data?.team?.payment) setAmount(sData.data.payment_amount || 500);
+        if (!tData.data?.team?.payment) setAmount(sData.data.payment_amount || 625);
       }
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -113,12 +113,12 @@ export default function PaymentPage() {
               <p className="text-[10px] font-semibold text-[#737373] uppercase tracking-widest mb-3">Official UPI Payment</p>
               <div className="border-t border-[#EAEAEA] w-full mb-5" />
               <h3 className="text-lg font-bold text-[#111111] mb-1" style={{ fontFamily: "Manrope, sans-serif" }}>
-                Scan & Pay ₹{eventSettings?.payment_amount || 500}
+                Scan & Pay ₹{eventSettings?.payment_amount || 625}
               </h3>
               <p className="text-xs text-[#737373] mb-5">Per team entry fee</p>
               <div className="p-3 border border-[#EAEAEA] rounded-md mb-4">
                 <img
-                  src={eventSettings?.upi_qr_url || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=vortexa2026@upi&pn=VORTEXA%20Hackathon&am=500&cu=INR`}
+                  src={eventSettings?.upi_qr_url || `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=vortexa2026@upi&pn=VORTEXA%20Hackathon&am=625&cu=INR`}
                   alt="Official VORTEXA UPI QR"
                   className="w-44 h-44 object-contain"
                 />

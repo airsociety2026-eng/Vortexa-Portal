@@ -9,7 +9,7 @@ export default function AdminSettingsPage() {
   const [eventYear, setEventYear] = useState("2026");
   const [registrationOpen, setRegistrationOpen] = useState(true);
   const [registrationClose, setRegistrationClose] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState(500);
+  const [paymentAmount, setPaymentAmount] = useState(625);
   const [upiId, setUpiId] = useState("vortexa2026@upi");
   const [upiQrUrl, setUpiQrUrl] = useState("");
   const [venue, setVenue] = useState("VORTEXA Innovation Center, Main Campus");
@@ -28,7 +28,7 @@ export default function AdminSettingsPage() {
           setEventYear(s.event_year || "2026");
           setRegistrationOpen(s.registration_open ?? true);
           setRegistrationClose(s.registration_close ?? false);
-          setPaymentAmount(s.payment_amount || 500);
+          setPaymentAmount(s.payment_amount || 625);
           setUpiId(s.upi_id || "vortexa2026@upi");
           setUpiQrUrl(s.upi_qr_url || "");
           setVenue(s.venue || "");
