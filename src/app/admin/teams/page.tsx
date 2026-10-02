@@ -7,6 +7,28 @@ export default function AdminTeamsPage() {
   const [loading, setLoading] = useState(true);
   const [teams, setTeams] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [reminding, setReminding] = useState<string | null>(null);
+
+  const handleRemind = async (teamId: string) => {
+    setReminding(teamId);
+    try {
+      const res = await fetch("/api/admin/payments/remind", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teamId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Reminder email sent successfully!");
+      } else {
+        alert(data.error?.message || "Failed to send reminder.");
+      }
+    } catch {
+      alert("Network error.");
+    } finally {
+      setReminding(null);
+    }
+  };
 
   useEffect(() => {
     fetch("/api/teams/all")
@@ -66,6 +88,7 @@ export default function AdminTeamsPage() {
                   <th>Ticket QR</th>
                   <th>Check-in</th>
                   <th>Room</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -89,6 +112,17 @@ export default function AdminTeamsPage() {
                     <td className="font-mono">{t.checkin ? "✓ CHECKED IN" : "PENDING"}</td>
                     <td className="font-bold">
                       {t.room_allocation?.room?.room_name || "Unassigned"}
+                    </td>
+                    <td>
+                      {t.payment?.status !== "VERIFIED" && (
+                        <button
+                          onClick={() => handleRemind(t.id)}
+                          disabled={reminding === t.id}
+                          className="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded shadow disabled:opacity-50"
+                        >
+                          {reminding === t.id ? "Sending..." : "Send Reminder"}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

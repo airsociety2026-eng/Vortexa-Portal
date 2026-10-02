@@ -60,6 +60,17 @@ export default function AdminPaymentsPage() {
     } catch { setErrorMsg("Error resending email"); } finally { setSubmitting(false); }
   };
 
+  const handleRemindEmail = async (teamId: string) => {
+    if (!teamId) return;
+    setSubmitting(true); setMessage(""); setErrorMsg("");
+    try {
+      const res = await fetch("/api/admin/payments/remind", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ teamId }) });
+      const data = await res.json();
+      if (data.success) { setMessage(data.message || "Reminder sent."); fetchPayments(); }
+      else setErrorMsg(typeof data.error === "string" ? data.error : data.error?.message || "Failed to send reminder");
+    } catch { setErrorMsg("Error sending reminder email"); } finally { setSubmitting(false); }
+  };
+
   const filtered = payments.filter((p) => {
     const s = search.toLowerCase();
     const matchesSearch = p.utr_number?.toLowerCase().includes(s) || p.payer_name?.toLowerCase().includes(s) || p.team?.team_code?.toLowerCase().includes(s) || p.team?.team_name?.toLowerCase().includes(s);
@@ -174,6 +185,11 @@ export default function AdminPaymentsPage() {
                           {p.status !== "REJECTED" && (
                             <button disabled={submitting} onClick={() => setRejectingPayment(p)} className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-[#FEF3F2] text-[#B42318] border border-[#FECACA] hover:bg-[#FEE2E2] transition-colors">
                               Reject
+                            </button>
+                          )}
+                          {p.status !== "VERIFIED" && p.team?.id && (
+                            <button disabled={submitting} onClick={() => handleRemindEmail(p.team.id)} className="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors">
+                              Remind
                             </button>
                           )}
                         </div>
