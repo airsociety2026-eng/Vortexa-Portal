@@ -19,6 +19,7 @@ export default function AdminParticipantsPage() {
             t.members?.forEach((m: any) => {
               parts.push({
                 ...m.participant,
+                email: m.participant?.user?.email || "N/A",
                 teamCode: t.team_code,
                 teamName: t.team_name,
                 roleInTeam: m.role,
@@ -41,6 +42,31 @@ export default function AdminParticipantsPage() {
     );
   });
 
+  const exportToCSV = () => {
+    if (filtered.length === 0) return;
+    const headers = ["Name", "Email", "Phone", "College", "Course", "Year", "Team Code", "Team Name", "Role"];
+    const rows = filtered.map(p => [
+      `"${p.name || ""}"`,
+      `"${p.email || ""}"`,
+      `"${p.phone || ""}"`,
+      `"${p.college || ""}"`,
+      `"${p.course || ""}"`,
+      `"${p.year || ""}"`,
+      `"${p.teamCode || ""}"`,
+      `"${p.teamName || ""}"`,
+      `"${p.roleInTeam || ""}"`
+    ]);
+    
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `vortexa_participants_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between glass-card p-6 rounded-2xl">
@@ -53,6 +79,14 @@ export default function AdminParticipantsPage() {
             View all registered participants across colleges, courses, and hackathon teams.
           </p>
         </div>
+        <button
+          onClick={exportToCSV}
+          disabled={filtered.length === 0}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
       </div>
 
       <div className="relative">
@@ -77,7 +111,7 @@ export default function AdminParticipantsPage() {
             <table className="vx-table">
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>Name & Email</th>
                   <th>College</th>
                   <th>Course & Year</th>
                   <th>Phone</th>
@@ -87,7 +121,10 @@ export default function AdminParticipantsPage() {
               <tbody>
                 {filtered.map((p, idx) => (
                   <tr key={idx}>
-                    <td className="font-bold text-foreground">{p.name}</td>
+                    <td>
+                      <div className="font-bold text-foreground">{p.name}</div>
+                      <div className="text-[10px] text-muted">{p.email}</div>
+                    </td>
                     <td className="text-muted">{p.college}</td>
                     <td className="text-muted font-mono">
                       {p.course} ({p.year})
