@@ -7,6 +7,7 @@ export default function AdminParticipantsPage() {
   const [loading, setLoading] = useState(true);
   const [participants, setParticipants] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [filterVerified, setFilterVerified] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/analytics")
@@ -23,6 +24,7 @@ export default function AdminParticipantsPage() {
                 teamCode: t.team_code,
                 teamName: t.team_name,
                 roleInTeam: m.role,
+                paymentStatus: t.payment?.status || "NOT_SUBMITTED",
               });
             });
           });
@@ -34,6 +36,8 @@ export default function AdminParticipantsPage() {
   }, []);
 
   const filtered = participants.filter((p) => {
+    if (filterVerified && p.paymentStatus !== "VERIFIED") return false;
+    
     const q = search.toLowerCase();
     return (
       p.name?.toLowerCase().includes(q) ||
@@ -44,7 +48,7 @@ export default function AdminParticipantsPage() {
 
   const exportToCSV = () => {
     if (filtered.length === 0) return;
-    const headers = ["Name", "Email", "Phone", "College", "Course", "Year", "Team Code", "Team Name", "Role"];
+    const headers = ["Name", "Email", "Phone", "College", "Course", "Year", "Team Code", "Team Name", "Role", "Payment Status"];
     const rows = filtered.map(p => [
       `"${p.name || ""}"`,
       `"${p.email || ""}"`,
@@ -54,7 +58,8 @@ export default function AdminParticipantsPage() {
       `"${p.year || ""}"`,
       `"${p.teamCode || ""}"`,
       `"${p.teamName || ""}"`,
-      `"${p.roleInTeam || ""}"`
+      `"${p.roleInTeam || ""}"`,
+      `"${p.paymentStatus || ""}"`
     ]);
     
     const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -89,15 +94,26 @@ export default function AdminParticipantsPage() {
         </button>
       </div>
 
-      <div className="relative">
-        <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-muted" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by participant name, college, course, or team code..."
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
-        />
+      <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full">
+          <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-muted" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by participant name, college, course, or team code..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
+          />
+        </div>
+        <label className="flex items-center gap-2 text-xs font-bold text-foreground cursor-pointer bg-white/5 px-4 py-2.5 rounded-xl border border-white/10">
+          <input
+            type="checkbox"
+            checked={filterVerified}
+            onChange={(e) => setFilterVerified(e.target.checked)}
+            className="rounded border-white/20 bg-black/50 text-primary focus:ring-primary focus:ring-offset-0"
+          />
+          Verified Teams Only
+        </label>
       </div>
 
       {loading ? (
