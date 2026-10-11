@@ -39,6 +39,11 @@ model Participant {
   year        String
   created_at  DateTime @default(now())
 
+  // Unified Registration Fields
+  registration_source      String?  @default("NATIVE") // NATIVE, IMPORTED
+  external_registration_id String?  @unique
+  import_batch_id          String?
+
   team_memberships TeamMember[]
   certificates     Certificate[]
 
@@ -62,6 +67,7 @@ model Team {
   result            Result?
   certificates      Certificate[]
   judge_assignments JudgeAssignment[]
+  commits           Commit[]
 
   @@map("teams")
 }
@@ -340,4 +346,45 @@ model EventSettings {
   official_email      String   @default("support@vortexa.io")
 
   @@map("event_settings")
+}
+
+model ClaimToken {
+  id         String   @id @default(uuid())
+  token_hash String   @unique
+  email      String
+  team_id    String?
+  role       String   @default("PARTICIPANT")
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime @default(now())
+
+  @@map("claim_tokens")
+}
+
+model Commit {
+  id           String   @id @default(uuid())
+  sha          String   @unique
+  message      String
+  author_name  String
+  author_email String?
+  team_id      String
+  team         Team     @relation(fields: [team_id], references: [id], onDelete: Cascade)
+  url          String
+  timestamp    DateTime
+  created_at   DateTime @default(now())
+
+  @@index([team_id])
+  @@map("commits")
+}
+
+model WebhookEvent {
+  id               String   @id @default(uuid())
+  github_delivery  String   @unique
+  event_type       String
+  payload          String
+  status           String   @default("PENDING") // PENDING, PROCESSED, FAILED
+  error_message    String?
+  created_at       DateTime @default(now())
+
+  @@map("webhook_events")
 }

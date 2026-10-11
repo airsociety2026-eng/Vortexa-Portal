@@ -159,8 +159,9 @@ export function Navbar() {
                 { href: "/dashboard/ticket",      label: "3. Ticket" },
                 { href: "/dashboard/room",        label: "4. Room" },
                 { href: "/dashboard/problems",    label: "5. Tracks" },
-                { href: "/dashboard/results",     label: "6. Results" },
-                { href: "/dashboard/certificate", label: "7. Certificate" },
+                { href: "/dashboard/submission",  label: "6. Project & Git" },
+                { href: "/dashboard/results",     label: "7. Results" },
+                { href: "/dashboard/certificate", label: "8. Certificate" },
               ].map(({ href, label }) => {
                 const isActive = pathname === href;
                 return (

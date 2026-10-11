@@ -103,12 +103,13 @@ export default function ParticipantDashboard() {
         <ProgressTracker state={journeyState} />
 
         {/* Step Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-8">
           {[
             { href: "/dashboard/team",       step: "01", icon: Users,       title: "Team",          detail: team?.team_code || "No team yet" },
             { href: "/dashboard/payment",    step: "02", icon: CreditCard,  title: "Payment",       detail: team?.payment?.status || "Not submitted" },
             { href: "/dashboard/ticket",     step: "03", icon: QrCode,      title: "Ticket",        detail: team?.ticket ? "Active" : "Awaiting verification" },
             { href: "/dashboard/room",       step: "04", icon: Building,    title: "Room",          detail: team?.room_allocation?.room?.room_name || "Pending check-in" },
+            { href: "/dashboard/submission", step: "05", icon: FolderGit2,  title: "Project & Git", detail: team?.submission ? (team.submission.status === "SUBMITTED" ? "Submitted" : "Draft") : "Link Repository" },
           ].map((c) => {
             const Icon = c.icon;
             return (

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { apiResponse, apiError } from "@/lib/utils";
-import { parseGitHubUrl, fetchGitHubRepoData } from "@/lib/github";
+import { parseGitHubUrl, fetchGitHubRepoData, syncTeamCommitsFromGitHub, matchContributorToMembers } from "@/lib/github";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const teamId = searchParams.get("teamId");
     const all = searchParams.get("all") === "true";
+    const forceSync = searchParams.get("sync") === "true";
 
     // 1. Single Team GitHub Monitoring Request
     if (teamId) {
@@ -21,9 +22,15 @@ export async function GET(req: NextRequest) {
         where: { id: teamId },
         include: {
           submission: true,
+          commits: {
+            orderBy: { timestamp: "desc" },
+            take: 100,
+          },
           members: {
             include: {
-              participant: true,
+              participant: {
+                include: { user: true },
+              },
             },
           },
         },
@@ -39,6 +46,7 @@ export async function GET(req: NextRequest) {
             id: team.id,
             team_code: team.team_code,
             team_name: team.team_name,
+            members: team.members.map((m) => m.participant.name),
           },
           hasSubmission: false,
           message: "Team has not submitted a GitHub repository URL yet.",
@@ -52,6 +60,7 @@ export async function GET(req: NextRequest) {
             id: team.id,
             team_code: team.team_code,
             team_name: team.team_name,
+            members: team.members.map((m) => m.participant.name),
           },
           hasSubmission: true,
           githubUrl: team.submission.github_url,
@@ -60,24 +69,101 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      const teamMemberNames = team.members.map((m) => ({
+      const teamMembersList = team.members.map((m) => ({
         name: m.participant.name,
+        email: m.participant.user?.email || null,
       }));
 
-      // Fetch real GitHub API activity
-      const repoDetails = await fetchGitHubRepoData(
-        parsed.owner,
-        parsed.repo,
-        teamMemberNames
-      );
+      // If forceSync requested or if 0 commits stored so far, backfill from GitHub REST API
+      if (forceSync || team.commits.length === 0) {
+        await syncTeamCommitsFromGitHub(team.id, parsed.owner, parsed.repo);
+      }
 
-      // Update submission metadata in DB
-      await db.submission.update({
-        where: { id: team.submission.id },
-        data: {
-          github_owner: parsed.owner,
-          github_repo: parsed.repo,
-          github_last_synced_at: new Date(),
+      // Re-fetch persisted commits from DB
+      const dbCommits = await db.commit.findMany({
+        where: { team_id: team.id },
+        orderBy: { timestamp: "desc" },
+        take: 100,
+      });
+
+      // Try fetching live metadata (branches, PRs, stargazers)
+      let liveRepoData = await fetchGitHubRepoData(parsed.owner, parsed.repo, teamMembersList);
+
+      // Merge DB commits if liveRepoData failed or returned fewer commits
+      const mergedCommits = dbCommits.map((c) => {
+        const match = matchContributorToMembers(
+          { name: c.author_name, email: c.author_email },
+          teamMembersList
+        );
+        return {
+          sha: c.sha,
+          shortSha: c.sha.substring(0, 7),
+          message: c.message,
+          authorName: c.author_name,
+          authorEmail: c.author_email,
+          date: c.timestamp.toISOString(),
+          htmlUrl: c.url,
+          isMatched: match.matched,
+          matchedMemberName: match.memberName,
+        };
+      });
+
+      // Aggregate contributor statistics from persisted commits
+      const contributorStats: Record<string, { count: number; email?: string; matchedMemberName?: string; isMatched: boolean }> = {};
+      mergedCommits.forEach((c) => {
+        const key = c.authorName || "Unknown";
+        if (!contributorStats[key]) {
+          const match = matchContributorToMembers(
+            { name: c.authorName, email: c.authorEmail },
+            teamMembersList
+          );
+          contributorStats[key] = {
+            count: 0,
+            email: c.authorEmail || undefined,
+            matchedMemberName: match.memberName,
+            isMatched: match.matched,
+          };
+        }
+        contributorStats[key].count++;
+      });
+
+      const aggregatedContributors = Object.entries(contributorStats).map(([name, data]) => ({
+        login: name,
+        avatarUrl: `https://github.com/${name.replace(/\s+/g, "")}.png`,
+        contributions: data.count,
+        htmlUrl: `https://github.com/${parsed.owner}/${parsed.repo}/commits?author=${encodeURIComponent(name)}`,
+        matchedMemberName: data.matchedMemberName,
+        isUnmatched: !data.isMatched,
+      }));
+
+      const finalRepoDetails = {
+        owner: parsed.owner,
+        repo: parsed.repo,
+        fullName: `${parsed.owner}/${parsed.repo}`,
+        description: liveRepoData.accessible ? liveRepoData.description : null,
+        defaultBranch: liveRepoData.accessible ? liveRepoData.defaultBranch : "main",
+        stars: liveRepoData.stars,
+        forks: liveRepoData.forks,
+        openIssuesCount: liveRepoData.openIssuesCount,
+        isPrivate: liveRepoData.isPrivate,
+        lastUpdated: liveRepoData.lastUpdated,
+        htmlUrl: team.submission.github_url,
+        accessible: liveRepoData.accessible || mergedCommits.length > 0,
+        errorMessage: liveRepoData.errorMessage,
+        totalCommits: mergedCommits.length,
+        lastCommitTime: mergedCommits[0]?.date || null,
+        commits: mergedCommits,
+        branches: liveRepoData.branches,
+        pullRequests: liveRepoData.pullRequests,
+        contributors: aggregatedContributors.length > 0 ? aggregatedContributors : liveRepoData.contributors,
+        unmatchedContributors: aggregatedContributors.filter((c) => c.isUnmatched).map((c) => c.login),
+        syncedAt: team.submission.github_last_synced_at?.toISOString() || new Date().toISOString(),
+      };
+
+      // Retrieve recent Webhook events count
+      const webhookEventsCount = await db.webhookEvent.count({
+        where: {
+          payload: { contains: parsed.repo },
         },
       });
 
@@ -91,81 +177,65 @@ export async function GET(req: NextRequest) {
         hasSubmission: true,
         githubUrl: team.submission.github_url,
         projectTitle: team.submission.project_title,
-        repoDetails,
+        lastSyncedAt: team.submission.github_last_synced_at,
+        webhookEventsReceived: webhookEventsCount,
+        repoDetails: finalRepoDetails,
       });
     }
 
-    // 2. All Teams Overview Request for Live Admin Monitoring
+    // 2. All Teams Overview Request for Live Admin Monitoring (DB Optimized)
     if (all) {
       const teams = await db.team.findMany({
         include: {
           submission: true,
-          members: {
-            include: {
-              participant: true,
-            },
+          commits: {
+            orderBy: { timestamp: "desc" },
+            take: 1, // Only need latest commit for the list table
+          },
+          _count: {
+            select: { commits: true },
           },
         },
         orderBy: { created_at: "desc" },
       });
 
-      const monitoredTeams = await Promise.all(
-        teams.map(async (t) => {
-          if (!t.submission || !t.submission.github_url) {
-            return {
-              id: t.id,
-              team_code: t.team_code,
-              team_name: t.team_name,
-              hasSubmission: false,
-              githubUrl: null,
-              accessible: false,
-              totalCommits: 0,
-              lastCommitTime: null,
-            };
-          }
-
-          const parsed = parseGitHubUrl(t.submission.github_url);
-          if (!parsed) {
-            return {
-              id: t.id,
-              team_code: t.team_code,
-              team_name: t.team_name,
-              hasSubmission: true,
-              githubUrl: t.submission.github_url,
-              accessible: false,
-              totalCommits: 0,
-              lastCommitTime: null,
-              errorMessage: "Invalid URL",
-            };
-          }
-
-          const memberNames = t.members.map((m) => ({ name: m.participant.name }));
-          const repoDetails = await fetchGitHubRepoData(parsed.owner, parsed.repo, memberNames);
-
+      const monitoredTeams = teams.map((t) => {
+        if (!t.submission || !t.submission.github_url) {
           return {
             id: t.id,
             team_code: t.team_code,
             team_name: t.team_name,
-            hasSubmission: true,
-            githubUrl: t.submission.github_url,
-            projectTitle: t.submission.project_title,
-            accessible: repoDetails.accessible,
-            totalCommits: repoDetails.totalCommits,
-            lastCommitTime: repoDetails.lastCommitTime,
-            latestCommitMessage: repoDetails.commits[0]?.message || null,
-            latestCommitAuthor: repoDetails.commits[0]?.authorName || null,
-            contributorsCount: repoDetails.contributors.length,
-            branchesCount: repoDetails.branches.length,
-            pullRequestsCount: repoDetails.pullRequests.length,
-            errorMessage: repoDetails.errorMessage,
+            hasSubmission: false,
+            githubUrl: null,
+            accessible: false,
+            totalCommits: 0,
+            lastCommitTime: null,
           };
-        })
-      );
+        }
 
-      // Compute statistics
+        const latestCommit = t.commits[0];
+        const totalCommits = t._count.commits;
+
+        return {
+          id: t.id,
+          team_code: t.team_code,
+          team_name: t.team_name,
+          hasSubmission: true,
+          githubUrl: t.submission.github_url,
+          projectTitle: t.submission.project_title,
+          accessible: totalCommits > 0 || !!t.submission.github_owner,
+          totalCommits,
+          lastCommitTime: latestCommit ? latestCommit.timestamp.toISOString() : null,
+          latestCommitMessage: latestCommit ? latestCommit.message : null,
+          latestCommitAuthor: latestCommit ? latestCommit.author_name : null,
+          lastSyncedAt: t.submission.github_last_synced_at?.toISOString() || null,
+        };
+      });
+
+      // Compute statistics directly
       const totalTeams = teams.length;
       const totalSubmissions = monitoredTeams.filter((t) => t.hasSubmission).length;
-      const activeRepos = monitoredTeams.filter((t) => t.accessible).length;
+      const activeRepos = monitoredTeams.filter((t) => t.accessible && t.totalCommits > 0).length;
 
       const now = new Date().getTime();
       const last1Hour = monitoredTeams.filter((t) => {
@@ -181,7 +251,9 @@ export async function GET(req: NextRequest) {
       }).length;
 
       const noRecentActivity = monitoredTeams.filter(
-        (t) => t.hasSubmission && (!t.lastCommitTime || now - new Date(t.lastCommitTime).getTime() > 3 * 60 * 60 * 1000)
+        (t) =>
+          t.hasSubmission &&
+          (!t.lastCommitTime || now - new Date(t.lastCommitTime).getTime() > 3 * 60 * 60 * 1000)
       ).length;
 
       return apiResponse(true, {

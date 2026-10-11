@@ -17,6 +17,10 @@ import {
   Code,
   Activity,
   Layers,
+  Webhook,
+  Copy,
+  Check,
+  ShieldAlert,
 } from "lucide-react";
 
 function AdminMonitoringContent() {
@@ -25,12 +29,14 @@ function AdminMonitoringContent() {
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [copiedWebhook, setCopiedWebhook] = useState(false);
   const [data, setData] = useState<any>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>(initialTeamId);
   const [selectedTeamData, setSelectedTeamData] = useState<any>(null);
   const [loadingTeam, setLoadingTeam] = useState(false);
   const [search, setSearch] = useState("");
-  const [timeWindow, setTimeWindow] = useState<"1h" | "3h" | "all">("1h");
+  const [timeWindow, setTimeWindow] = useState<"1h" | "3h" | "all">("all");
 
   const fetchOverview = () => {
     setRefreshing(true);
@@ -56,10 +62,10 @@ function AdminMonitoringContent() {
       });
   };
 
-  const fetchTeamDetails = (teamId: string) => {
+  const fetchTeamDetails = (teamId: string, forceSync = false) => {
     if (!teamId) return;
     setLoadingTeam(true);
-    fetch(`/api/github/monitor?teamId=${teamId}`)
+    fetch(`/api/github/monitor?teamId=${teamId}${forceSync ? "&sync=true" : ""}`)
       .then((r) => r.json())
       .then((res) => {
         if (res.success) {
@@ -68,6 +74,25 @@ function AdminMonitoringContent() {
         setLoadingTeam(false);
       })
       .catch(() => setLoadingTeam(false));
+  };
+
+  const handleManualSync = (teamId: string) => {
+    if (!teamId) return;
+    setSyncing(true);
+    fetch("/api/github/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ teamId }),
+    })
+      .then((r) => r.json())
+      .then(() => {
+        fetchTeamDetails(teamId, true);
+        fetchOverview();
+        setSyncing(false);
+      })
+      .catch(() => {
+        setSyncing(false);
+      });
   };
 
   useEffect(() => {
@@ -108,6 +133,13 @@ function AdminMonitoringContent() {
 
   const selectedTeam = selectedTeamData?.team;
   const repoDetails = selectedTeamData?.repoDetails;
+  const webhookUrl = typeof window !== "undefined" ? `${window.location.origin}/api/github/webhook` : "/api/github/webhook";
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedWebhook(true);
+    setTimeout(() => setCopiedWebhook(false), 2000);
+  };
 
   return (
     <div className="space-y-6">
@@ -116,10 +148,10 @@ function AdminMonitoringContent() {
         <div>
           <div className="flex items-center gap-2">
             <Github className="w-6 h-6 text-cyan-400" />
-            <h1 className="text-2xl font-extrabold text-white">Live Hackathon Project Monitor</h1>
+            <h1 className="text-2xl font-extrabold text-white">Live Hackathon Git Tracker</h1>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time GitHub activity tracking, commit timelines, and repository stats for all registered teams.
+            Automated GitHub webhook tracking, commit verification, and author audit against team rosters.
           </p>
         </div>
 
@@ -132,7 +164,7 @@ function AdminMonitoringContent() {
           className="px-4 py-2.5 rounded-xl gradient-btn text-xs font-bold flex items-center gap-2 shadow-glow self-start sm:self-auto"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-          <span>{refreshing ? "Synchronizing..." : "Refresh GitHub Data"}</span>
+          <span>{refreshing ? "Refreshing..." : "Refresh Overview"}</span>
         </button>
       </div>
 
@@ -144,7 +176,7 @@ function AdminMonitoringContent() {
             <Users className="w-4 h-4 text-purple-400" />
           </div>
           <div className="text-2xl font-extrabold text-white">{stats.totalTeams || 0}</div>
-          <div className="text-[10px] text-slate-500">{stats.totalSubmissions || 0} Submitted Repositories</div>
+          <div className="text-[10px] text-slate-500">{stats.totalSubmissions || 0} Repositories Linked</div>
         </div>
 
         <div className="glass-card p-4 rounded-xl border border-emerald-500/30 space-y-1">
@@ -153,7 +185,7 @@ function AdminMonitoringContent() {
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl font-extrabold text-emerald-400">{stats.activeRepos || 0}</div>
-          <div className="text-[10px] text-emerald-400/70">Verified & Accessible</div>
+          <div className="text-[10px] text-emerald-400/70">With Recorded Commits</div>
         </div>
 
         <div className="glass-card p-4 rounded-xl border border-cyan-500/30 space-y-1">
@@ -171,7 +203,7 @@ function AdminMonitoringContent() {
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl font-extrabold text-amber-400">{stats.noRecentActivity || 0}</div>
-          <div className="text-[10px] text-slate-400">No commits in last 3 hours</div>
+          <div className="text-[10px] text-slate-400">Idle for &gt; 3 hours</div>
         </div>
       </div>
 
@@ -181,7 +213,7 @@ function AdminMonitoringContent() {
         <div className="space-y-4">
           <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-3">
             <h3 className="font-bold text-white text-sm flex items-center justify-between">
-              <span>Select Hackathon Team</span>
+              <span>Registered Teams</span>
               <span className="text-[10px] font-mono text-slate-400">({filteredTeams.length} teams)</span>
             </h3>
 
@@ -193,7 +225,7 @@ function AdminMonitoringContent() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Filter team..."
+                  placeholder="Filter by team or code..."
                   className="w-full pl-9 pr-3 py-2 rounded-xl glass-input text-xs"
                 />
               </div>
@@ -264,10 +296,10 @@ function AdminMonitoringContent() {
                         </span>
                         <span
                           className={`font-semibold ${
-                            t.accessible ? "text-emerald-400" : "text-amber-400"
+                            t.totalCommits > 0 ? "text-emerald-400" : t.hasSubmission ? "text-amber-400" : "text-slate-500"
                           }`}
                         >
-                          {t.accessible ? "✓ Active" : t.hasSubmission ? "Private / Error" : "No Submission"}
+                          {t.totalCommits > 0 ? "✓ Tracking" : t.hasSubmission ? "Linked (0 commits)" : "No Repo"}
                         </span>
                       </div>
                     </button>
@@ -283,12 +315,12 @@ function AdminMonitoringContent() {
           {!selectedTeamId ? (
             <div className="glass-card p-12 rounded-2xl border border-white/10 text-center">
               <Github className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-xs text-slate-400">Select a team from the list to view GitHub monitoring details.</p>
+              <p className="text-xs text-slate-400">Select a team from the list to view Git tracking details.</p>
             </div>
           ) : loadingTeam ? (
             <div className="glass-card p-16 rounded-2xl border border-white/10 text-center">
               <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-xs text-slate-400">Fetching GitHub API activity...</p>
+              <p className="text-xs text-slate-400">Fetching Git activity and contributor details...</p>
             </div>
           ) : selectedTeamData ? (
             <div className="space-y-6">
@@ -305,43 +337,74 @@ function AdminMonitoringContent() {
                         Project: {selectedTeamData.projectTitle}
                       </p>
                     )}
+                    <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-400">
+                      <Users className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Roster: {selectedTeam.members?.join(", ") || "No members listed"}</span>
+                    </div>
                   </div>
 
-                  {selectedTeamData.githubUrl && (
-                    <a
-                      href={selectedTeamData.githubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 font-semibold text-xs flex items-center gap-1.5 self-start"
-                    >
-                      <Github className="w-3.5 h-3.5" />
-                      <span>Open GitHub Repo</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {selectedTeamData.githubUrl && (
+                      <a
+                        href={selectedTeamData.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 font-semibold text-xs flex items-center gap-1.5"
+                      >
+                        <Github className="w-3.5 h-3.5" />
+                        <span>Open Repo</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+
+                    {selectedTeamData.githubUrl && (
+                      <button
+                        onClick={() => handleManualSync(selectedTeam.id)}
+                        disabled={syncing}
+                        className="px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-semibold text-xs flex items-center gap-1.5"
+                        title="Force sync latest commits from GitHub API"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${syncing ? "animate-spin" : ""}`} />
+                        <span>{syncing ? "Syncing..." : "Sync from GitHub"}</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {!selectedTeamData.hasSubmission ? (
                   <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
-                    This team has not submitted a GitHub repository link yet.
-                  </div>
-                ) : !repoDetails?.accessible ? (
-                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-1">
-                    <div className="font-bold flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-amber-400" />
-                      <span>Repository Monitoring Status</span>
-                    </div>
-                    <p>{repoDetails?.errorMessage || "Private repository or unauthorized access."}</p>
-                    <p className="text-[11px] text-amber-400/80">
-                      Note: If this repository is private, authorized GitHub integration or a public repository URL is required.
-                    </p>
+                    This team has not linked a GitHub repository yet.
                   </div>
                 ) : (
                   <>
-                    {/* Activity Metric Badges */}
+                    {/* Webhook Configuration & Sync Status Banner */}
+                    <div className="p-3.5 rounded-xl bg-slate-900/80 border border-cyan-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2">
+                        <Webhook className="w-4 h-4 text-cyan-400 shrink-0" />
+                        <div>
+                          <span className="font-bold text-white">Webhook Integration: </span>
+                          <span className="text-slate-300 font-mono text-[11px]">{webhookUrl}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => copyToClipboard(webhookUrl)}
+                          className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-white/10 text-[10px] font-mono flex items-center gap-1"
+                        >
+                          {copiedWebhook ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          <span>{copiedWebhook ? "Copied" : "Copy Webhook URL"}</span>
+                        </button>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          Last Synced: {selectedTeamData.lastSyncedAt ? new Date(selectedTeamData.lastSyncedAt).toLocaleTimeString() : "Never"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Metric Badges */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div className="p-3 rounded-xl bg-slate-900/80 border border-white/5 space-y-1">
-                        <span className="text-slate-400 text-[10px] font-mono block">TOTAL COMMITS</span>
+                        <span className="text-slate-400 text-[10px] font-mono block">STORED COMMITS</span>
                         <span className="text-xl font-extrabold text-purple-400 flex items-center gap-1.5">
                           <GitCommit className="w-4 h-4" /> {repoDetails.totalCommits}
                         </span>
@@ -350,57 +413,72 @@ function AdminMonitoringContent() {
                       <div className="p-3 rounded-xl bg-slate-900/80 border border-white/5 space-y-1">
                         <span className="text-slate-400 text-[10px] font-mono block">CONTRIBUTORS</span>
                         <span className="text-xl font-extrabold text-emerald-400 flex items-center gap-1.5">
-                          <Users className="w-4 h-4" /> {repoDetails.contributors.length}
+                          <Users className="w-4 h-4" /> {repoDetails.contributors?.length || 0}
                         </span>
                       </div>
 
                       <div className="p-3 rounded-xl bg-slate-900/80 border border-white/5 space-y-1">
                         <span className="text-slate-400 text-[10px] font-mono block">BRANCHES</span>
                         <span className="text-xl font-extrabold text-cyan-400 flex items-center gap-1.5">
-                          <GitBranch className="w-4 h-4" /> {repoDetails.branches.length}
+                          <GitBranch className="w-4 h-4" /> {repoDetails.branches?.length || 0}
                         </span>
                       </div>
 
                       <div className="p-3 rounded-xl bg-slate-900/80 border border-white/5 space-y-1">
                         <span className="text-slate-400 text-[10px] font-mono block">PULL REQUESTS</span>
                         <span className="text-xl font-extrabold text-blue-400 flex items-center gap-1.5">
-                          <GitPullRequest className="w-4 h-4" /> {repoDetails.pullRequests.length}
+                          <GitPullRequest className="w-4 h-4" /> {repoDetails.pullRequests?.length || 0}
                         </span>
                       </div>
                     </div>
 
-                    {/* Roster & Contributors Mapping */}
+                    {/* Contributor Audit & Matching */}
                     <div className="pt-2 space-y-2">
-                      <h4 className="text-xs font-bold text-slate-300 uppercase font-mono">
-                        GitHub Contributors Breakdown
-                      </h4>
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-slate-300 uppercase font-mono">
+                          Contributor Verification & Roster Audit
+                        </h4>
+                        {repoDetails.unmatchedContributors?.length > 0 && (
+                          <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 flex items-center gap-1">
+                            <ShieldAlert className="w-3 h-3" />
+                            {repoDetails.unmatchedContributors.length} Unmatched Author(s) Detected
+                          </span>
+                        )}
+                      </div>
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {repoDetails.contributors.map((c: any) => (
+                        {repoDetails.contributors?.map((c: any) => (
                           <div
                             key={c.login}
-                            className="p-2.5 rounded-xl bg-slate-900/50 border border-white/5 flex items-center gap-2.5"
+                            className={`p-2.5 rounded-xl border flex items-center gap-2.5 ${
+                              c.isUnmatched
+                                ? "bg-amber-950/20 border-amber-500/30"
+                                : "bg-slate-900/50 border-white/5"
+                            }`}
                           >
-                            <img src={c.avatarUrl} alt={c.login} className="w-8 h-8 rounded-full border border-white/10" />
+                            <img
+                              src={c.avatarUrl}
+                              alt={c.login}
+                              className="w-8 h-8 rounded-full border border-white/10 bg-slate-800"
+                              onError={(e: any) => {
+                                e.target.src = "https://github.com/identicons/default.png";
+                              }}
+                            />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <a
-                                  href={c.htmlUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="font-bold text-xs text-white hover:text-cyan-300 truncate"
-                                >
-                                  {c.login}
-                                </a>
+                                <span className="font-bold text-xs text-white truncate">{c.login}</span>
                                 <span className="text-[10px] font-mono text-purple-300 font-bold">
                                   {c.contributions} commits
                                 </span>
                               </div>
                               {c.matchedMemberName ? (
-                                <span className="text-[10px] text-emerald-400 font-semibold block">
-                                  ✓ Matched: {c.matchedMemberName}
+                                <span className="text-[10px] text-emerald-400 font-semibold block flex items-center gap-1">
+                                  <CheckCircle2 className="w-2.5 h-2.5" /> Matched: {c.matchedMemberName}
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-slate-500 block">GitHub Contributor</span>
+                                <span className="text-[10px] text-amber-400 font-medium block flex items-center gap-1">
+                                  <AlertTriangle className="w-2.5 h-2.5" /> External contributor (not in roster)
+                                </span>
                               )}
                             </div>
                           </div>
@@ -410,41 +488,60 @@ function AdminMonitoringContent() {
 
                     {/* Commit Activity Timeline */}
                     <div className="pt-2 space-y-3">
-                      <h4 className="text-xs font-bold text-slate-300 uppercase font-mono flex items-center justify-between">
-                        <span>Recent Commit Timeline</span>
-                        <span className="text-[10px] text-slate-400 font-normal">Showing latest commits</span>
-                      </h4>
-
-                      <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                        {repoDetails.commits.map((commit: any) => (
-                          <div
-                            key={commit.sha}
-                            className="p-3 rounded-xl bg-slate-900/60 border border-white/5 hover:border-cyan-500/30 transition flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                          >
-                            <div className="space-y-1">
-                              <p className="font-semibold text-xs text-white flex items-center gap-1.5">
-                                <GitCommit className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                                <span>{commit.message}</span>
-                              </p>
-                              <div className="flex items-center gap-3 text-[10px] text-slate-400 font-mono">
-                                <span>Author: <strong className="text-slate-200">{commit.authorName}</strong></span>
-                                <span>•</span>
-                                <span>{new Date(commit.date).toLocaleDateString()} {new Date(commit.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                              </div>
-                            </div>
-
-                            <a
-                              href={commit.htmlUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 font-mono text-[10px] font-bold border border-cyan-500/20 self-start sm:self-auto shrink-0 flex items-center gap-1"
-                            >
-                              <span>{commit.shortSha}</span>
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          </div>
-                        ))}
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-slate-300 uppercase font-mono">
+                          Verified Commit Timeline ({repoDetails.commits?.length || 0})
+                        </h4>
+                        <span className="text-[10px] text-slate-400 font-mono">Real-time DB Stored</span>
                       </div>
+
+                      {repoDetails.commits?.length === 0 ? (
+                        <div className="p-6 rounded-xl bg-slate-900/40 border border-white/5 text-center text-xs text-slate-400">
+                          No commits recorded in database yet. Click &quot;Sync from GitHub&quot; or configure the repository webhook to begin tracking.
+                        </div>
+                      ) : (
+                        <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                          {repoDetails.commits.map((commit: any) => (
+                            <div
+                              key={commit.sha}
+                              className="p-3 rounded-xl bg-slate-900/60 border border-white/5 hover:border-cyan-500/30 transition flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                            >
+                              <div className="space-y-1">
+                                <p className="font-semibold text-xs text-white flex items-center gap-1.5">
+                                  <GitCommit className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                                  <span>{commit.message}</span>
+                                </p>
+                                <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-400 font-mono">
+                                  <span>
+                                    Author: <strong className="text-slate-200">{commit.authorName}</strong>
+                                  </span>
+                                  {commit.matchedMemberName ? (
+                                    <span className="text-emerald-400 font-semibold">
+                                      (✓ {commit.matchedMemberName})
+                                    </span>
+                                  ) : (
+                                    <span className="text-amber-400/80">(Unverified author)</span>
+                                  )}
+                                  <span>•</span>
+                                  <span>
+                                    {new Date(commit.date).toLocaleDateString()} {new Date(commit.date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <a
+                                href={commit.htmlUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 font-mono text-[10px] font-bold border border-cyan-500/20 self-start sm:self-auto shrink-0 flex items-center gap-1"
+                              >
+                                <span>{commit.shortSha}</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </>
                 )}

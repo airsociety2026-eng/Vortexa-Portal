@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/auth";
 import { isAdminOrSuper } from "@/lib/rbac";
 import { db } from "@/lib/db";
 import { apiResponse, apiError } from "@/lib/utils";
+import { parseGitHubUrl, syncTeamCommitsFromGitHub } from "@/lib/github";
 import { z } from "zod";
 
 const submissionSchema = z.object({
@@ -174,17 +175,32 @@ export async function POST(req: NextRequest) {
       return apiError("Your submission has been locked by event administrators and cannot be modified.", 403);
     }
 
-    // Extract owner & repo from GitHub URL for monitoring
-    let githubOwner = null;
-    let githubRepo = null;
-    try {
-      const cleanUrl = validated.githubUrl.replace(/\/$/, "");
-      const parts = cleanUrl.split("github.com/")[1]?.split("/");
-      if (parts && parts.length >= 2) {
-        githubOwner = parts[0];
-        githubRepo = parts[1];
-      }
-    } catch (_) {}
+    // Extract owner & repo from GitHub URL with collision prevention
+    const parsedRepo = parseGitHubUrl(validated.githubUrl);
+    if (!parsedRepo) {
+      return apiError("Invalid GitHub repository URL format. Please provide a link like https://github.com/owner/repository", 400);
+    }
+    const githubOwner = parsedRepo.owner;
+    const githubRepo = parsedRepo.repo;
+
+    // COLLISION CHECK: Ensure no other team has already submitted this repository
+    const conflictingSubmission = await db.submission.findFirst({
+      where: {
+        github_owner: { equals: githubOwner, mode: "insensitive" },
+        github_repo: { equals: githubRepo, mode: "insensitive" },
+        team_id: { not: team.id },
+      },
+      include: {
+        team: true,
+      },
+    });
+
+    if (conflictingSubmission) {
+      return apiError(
+        `Repository "${githubOwner}/${githubRepo}" is already linked to team "${conflictingSubmission.team.team_name}" (${conflictingSubmission.team.team_code}). Every team must submit their own distinct repository.`,
+        400
+      );
+    }
 
     const submission = await db.submission.upsert({
       where: { team_id: team.id },
@@ -220,6 +236,11 @@ export async function POST(req: NextRequest) {
         project_files: validated.projectFiles || null,
         status: validated.status,
       },
+    });
+
+    // Proactively backfill commits in background
+    syncTeamCommitsFromGitHub(team.id, githubOwner, githubRepo).catch((syncErr) => {
+      console.warn("Background commit sync notice:", syncErr?.message || syncErr);
     });
 
     return apiResponse(
